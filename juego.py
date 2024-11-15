@@ -167,5 +167,8 @@ def gameLoop():
     pygame.quit()
     quit()
 
+
+# prueba 
+
 if __name__ == '__main__':
     gameLoop()
