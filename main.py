@@ -1,6 +1,6 @@
 from tkinter import *
 from modo_obstaculos import gameLoop
-
+#prueba
 
 def obstaculos():
     window.withdraw()
