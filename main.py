@@ -1,7 +1,12 @@
 from tkinter import *
 from modo_obstaculos import gameLoop
+from modo_clasico import gameLoop
 
 def obstaculos():
+    window.withdraw()
+    gameLoop(window)
+
+def clasico():
     window.withdraw()
     gameLoop(window)
 
@@ -15,7 +20,7 @@ def modos_de_juego():
     nuevo_label.config(font=("Verdana", 24))
     nuevo_label.pack()
 
-    boton_modo1 = Button(text="Modo Clásico", height=10, width=20)
+    boton_modo1 = Button(text="Modo Clásico", height=10, width=20, command = clasico)
     boton_modo1.place(relx=0.5, rely=0.5, anchor='center')
 
     boton_modo2 = Button(text="Modo obstaculos", height=10, width=20, command=obstaculos)
