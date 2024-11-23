@@ -1,15 +1,14 @@
 from tkinter import *
-from modo_obstaculos import gameLoop
-from modo_clasico import gameLoop
+from modo_obstaculos import gameLoop as gameLoopObstaculos
+from modo_clasico import gameLoop as gameLoopClasico
 
 def obstaculos():
     window.withdraw()
-    gameLoop(window)
+    gameLoopObstaculos(window)
 
 def clasico():
     window.withdraw()
-    gameLoop(window)
-
+    gameLoopClasico(window)
 
 def modos_de_juego():
     for widget in window.winfo_children():
@@ -20,10 +19,10 @@ def modos_de_juego():
     nuevo_label.config(font=("Verdana", 24))
     nuevo_label.pack()
 
-    boton_modo1 = Button(text="Modo Clásico", height=10, width=20, command = clasico)
+    boton_modo1 = Button(text="Modo Clásico", height=10, width=20, command=clasico)
     boton_modo1.place(relx=0.5, rely=0.5, anchor='center')
 
-    boton_modo2 = Button(text="Modo obstaculos", height=10, width=20, command=obstaculos)
+    boton_modo2 = Button(text="Modo Obstáculos", height=10, width=20, command=obstaculos)
     boton_modo2.place(relx=0.5, rely=0.25, anchor='center')
 
     boton_multijugador = Button(text="MULTIJUGADOR", height=10, width=20)
@@ -31,7 +30,6 @@ def modos_de_juego():
 
     boton_atras = Button(text="ATRÁS", height=3, width=10, command=pantalla_inicio)
     boton_atras.place(relx=0.1, rely=0.9, anchor='se')
-
 
 def pantalla_inicio():
     for widget in window.winfo_children():
