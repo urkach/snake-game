@@ -87,6 +87,8 @@ width = window.winfo_screenwidth()
 height = window.winfo_screenheight()
 window.geometry("%dx%d" % (width, height))
 
+window.iconbitmap('logo.ico')
+
 pantalla_inicio()
 
 window.mainloop()
