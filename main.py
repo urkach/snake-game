@@ -7,7 +7,7 @@ from modos.modo_extremo import gameLoop as gameLoopExtremo
 from modos.modo_extremo_multi import gameLoop as gameLoopExtremoMulti
 
 def on_enter(event):
-    event.widget.config(bg="#3498db", fg="white")
+    event.widget.config(bg="#6c777e", fg="white")
 
 def on_leave(event):
     event.widget.config(bg="#343030", fg="white")
