@@ -1,4 +1,5 @@
 # NO ESTA HECHO ES EL CLASICO MULTIJUGADOR
+
 import pygame
 import random
 
@@ -36,12 +37,12 @@ def gameLoop(window):
     game_over = False
     game_close = False
 
-    x1, y1 = SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2
+    x1, y1 = SCREEN_WIDTH * 3/ 4, SCREEN_HEIGHT / 2
     x1_change, y1_change = 0, 0
     snake1_length = 1
     snake1_list = [[x1, y1]]
 
-    x2, y2 = SCREEN_WIDTH * 3 / 4, SCREEN_HEIGHT / 2
+    x2, y2 = SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2
     x2_change, y2_change = 0, 0
     snake2_length = 1
     snake2_list = [[x2, y2]]
