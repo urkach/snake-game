@@ -134,12 +134,20 @@ def gameLoop(window):
             if segment == snake2_head:
                 game_close = True
 
+        
+
+        def check_collision(pos1, pos2, tolerance=2):
+            return abs(pos1[0] - pos2[0]) <= tolerance and abs(pos1[1] - pos2[1]) <= tolerance
+        
+
         for segment in snake1_list:
-            if segment == snake2_head:
+            if check_collision(segment, snake2_head):
                 game_close = True
         for segment in snake2_list:
-            if segment == snake1_head:
+            if check_collision(segment, snake1_head):
                 game_close = True
+
+
 
         draw_snake(BLOCK_SIZE, snake1_list, GREEN)
         draw_snake(BLOCK_SIZE, snake2_list, BLUE)
