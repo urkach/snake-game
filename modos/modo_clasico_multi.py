@@ -136,7 +136,7 @@ def gameLoop(window):
 
         
 
-        def check_collision(pos1, pos2, tolerance=2):
+        def check_collision(pos1, pos2, tolerance=10):
             return abs(pos1[0] - pos2[0]) <= tolerance and abs(pos1[1] - pos2[1]) <= tolerance
         
 

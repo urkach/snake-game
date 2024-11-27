@@ -1,4 +1,4 @@
-# NO ESTA HECHO ES EL CLASICO MULTIJUGADOR
+#ESTA BASADO EN EL CLASICO
 import pygame
 import random
 
@@ -79,7 +79,6 @@ def gameLoop(window):
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
-
                 if event.key == pygame.K_LEFT and direction1 != "RIGHT":
                     x1_change, y1_change = -BLOCK_SIZE, 0
                     direction1 = "LEFT"
@@ -136,17 +135,24 @@ def gameLoop(window):
             if segment == snake2_head:
                 game_close = True
 
+        
+
+        def check_collision(pos1, pos2, tolerance=10):
+            return abs(pos1[0] - pos2[0]) <= tolerance and abs(pos1[1] - pos2[1]) <= tolerance
+        
+
         for segment in snake1_list:
-            if segment == snake2_head:
+            if check_collision(segment, snake2_head):
                 game_close = True
         for segment in snake2_list:
-            if segment == snake1_head:
+            if check_collision(segment, snake1_head):
                 game_close = True
+
+
 
         draw_snake(BLOCK_SIZE, snake1_list, GREEN)
         draw_snake(BLOCK_SIZE, snake2_list, BLUE)
 
- 
         if x1 - BLOCK_SIZE <= foodx <= x1 + BLOCK_SIZE and y1 - BLOCK_SIZE <= foody <= y1 + BLOCK_SIZE:
             foodx, foody = generate_food()
             snake1_length += 1
