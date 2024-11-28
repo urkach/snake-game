@@ -37,16 +37,33 @@ def gameLoop(window):
             round(random.randrange(0, SCREEN_HEIGHT - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
         )
 
-    # Vibración no bloqueante
+    # Nueva función para verificar colisiones exactas
+    def check_collision(pos1, pos2, size=BLOCK_SIZE):
+        """
+        Verifica si dos rectángulos definidos por sus posiciones y tamaño se superponen.
+        pos1 y pos2 son las esquinas superiores izquierdas de los rectángulos.
+        """
+        rect1_x, rect1_y = pos1
+        rect2_x, rect2_y = pos2
+
+        return (
+            rect1_x < rect2_x + size and  # El borde derecho del rectángulo 1 no está a la izquierda del rectángulo 2
+            rect1_x + size > rect2_x and  # El borde izquierdo del rectángulo 1 no está a la derecha del rectángulo 2
+            rect1_y < rect2_y + size and  # El borde inferior del rectángulo 1 no está arriba del rectángulo 2
+            rect1_y + size > rect2_y      # El borde superior del rectángulo 1 no está debajo del rectángulo 2
+        )
+
+    # Modificar la función de vibración
     def vibrate_screen():
         offsets = [(-10, 0), (10, 0), (0, -10), (0, 10)]
         original = game_display.copy()
+        vibration_duration = random.uniform(0.3, 0.7)  # Tiempo aleatorio entre 0.3 y 0.7 segundos
         vibration_start = time.time()
-        while time.time() - vibration_start < 0.2:  # Vibrar durante 3 segundos
+        while time.time() - vibration_start < vibration_duration:
             for dx, dy in offsets:
                 game_display.blit(original, (dx, dy))
                 pygame.display.update()
-                pygame.time.wait(50)  # Corto retraso para simular la vibración
+                pygame.time.wait(50)
                 game_display.blit(original, (0, 0))
                 pygame.display.update()
 
@@ -91,7 +108,6 @@ def gameLoop(window):
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
-                # Evitar cambios opuestos de dirección
                 if event.key == pygame.K_LEFT and current_direction != "RIGHT":
                     x1_change = -BLOCK_SIZE
                     y1_change = 0
@@ -128,19 +144,20 @@ def gameLoop(window):
         if len(snake_list) > snake_length:
             del snake_list[0]
 
+        # Colisión con la propia serpiente
         for segment in snake_list[:-1]:
-            if segment == snake_head:
+            if check_collision(segment, snake_head):
                 game_close = True
 
         draw_snake(BLOCK_SIZE, snake_list)
 
         for foodx, foody in food_positions[:]:
-            if x1 == foodx and y1 == foody:
+            if check_collision((x1, y1), (foodx, foody)):
                 food_positions.remove((foodx, foody))
                 vibrate_screen()
                 snake_length += 1
                 score += 1
-                food_positions.append(generate_food())  # Generar nueva manzana
+                food_positions.append(generate_food())
                 new_obstacles = random.randint(1, 3)
                 for _ in range(new_obstacles):
                     obstacle_positions.append(generate_food())
@@ -148,7 +165,7 @@ def gameLoop(window):
 
         # Movimiento de obstáculos a mitad de velocidad
         obstacle_tick += 1
-        if obstacle_tick >= 2:  # Reducir la velocidad en comparación con la serpiente
+        if obstacle_tick >= 2:
             for i in range(len(obstacle_positions)):
                 obsx, obsy = obstacle_positions[i]
                 direction = obstacle_directions[i]
@@ -161,9 +178,9 @@ def gameLoop(window):
                 obstacle_positions[i] = (obsx, obsy)
             obstacle_tick = 0
 
-        # Verificar colisiones con obstáculos
+        # Colisión con obstáculos
         for obsx, obsy in obstacle_positions:
-            if x1 == obsx and y1 == obsy:
+            if check_collision((x1, y1), (obsx, obsy)):
                 game_close = True
 
         score_text = score_font.render("Puntuación: " + str(score), True, WHITE)

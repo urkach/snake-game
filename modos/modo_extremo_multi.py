@@ -1,12 +1,11 @@
-# NO ESTA HECHO ES EL CLASICO MULTIJUGADOR
-
 import pygame
 import random
-
+import time
 
 def gameLoop(window):
     pygame.init()
 
+    # Colores
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     GREEN = (0, 255, 0)
@@ -14,11 +13,12 @@ def gameLoop(window):
     RED = (213, 50, 80)
     YELLOW = (255, 255, 102)
 
+    # Configuración de pantalla
     game_display = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     surface = pygame.display.get_surface()
     SCREEN_WIDTH, SCREEN_HEIGHT = surface.get_width(), surface.get_height()
 
-    pygame.display.set_caption('Snake Game - Multijugador')
+    pygame.display.set_caption('Snake Game Multiplayer')
 
     clock = pygame.time.Clock()
     BLOCK_SIZE = 30
@@ -26,52 +26,109 @@ def gameLoop(window):
     font_style = pygame.font.SysFont("Cascadia Code PL, monospace", 25, bold=True)
     score_font = pygame.font.SysFont("Cascadia Code PL, monospace", 35, bold=True)
 
+    # Función para mostrar mensajes
     def message(msg, color, x, y):
         mesg = font_style.render(msg, True, color)
         game_display.blit(mesg, [x, y])
 
+    # Dibujar serpiente
     def draw_snake(block_size, snake_list, color):
         for x in snake_list:
             pygame.draw.rect(game_display, color, [x[0], x[1], block_size, block_size])
 
-    game_over = False
-    game_close = False
-
-    x1, y1 = SCREEN_WIDTH * 3/ 4, SCREEN_HEIGHT / 2
-    x1_change, y1_change = 0, 0
-    snake1_length = 1
-    snake1_list = [[x1, y1]]
-
-    x2, y2 = SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2
-    x2_change, y2_change = 0, 0
-    snake2_length = 1
-    snake2_list = [[x2, y2]]
-
-    score1, score2 = 0, 0
-    direction1, direction2 = None, None
-
+    # Generar comida en posiciones aleatorias
     def generate_food():
         return (
             round(random.randrange(0, SCREEN_WIDTH - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
             round(random.randrange(0, SCREEN_HEIGHT - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
         )
 
-    foodx, foody = generate_food()
+    # Verificar colisiones exactas
+    def check_collision(pos1, pos2, size=BLOCK_SIZE):
+        return (
+            pos1[0] < pos2[0] + size and
+            pos1[0] + size > pos2[0] and
+            pos1[1] < pos2[1] + size and
+            pos1[1] + size > pos2[1]
+        )
+
+    # Vibrar pantalla
+    def vibrate_screen():
+        offsets = [(-10, 0), (10, 0), (0, -10), (0, 10)]
+        original = game_display.copy()
+        vibration_duration = random.uniform(0.3, 0.7)
+        vibration_start = time.time()
+        while time.time() - vibration_start < vibration_duration:
+            for dx, dy in offsets:
+                game_display.blit(original, (dx, dy))
+                pygame.display.update()
+                pygame.time.wait(50)
+        game_display.blit(original, (0, 0))
+        pygame.display.update()
+
+    # Variables iniciales
+    game_over = False
+    game_close = False
+
+    # Configuración inicial para dos jugadores
+    players = [
+        {
+            "color": GREEN,
+            "x": SCREEN_WIDTH / 4,
+            "y": SCREEN_HEIGHT / 2,
+            "x_change": 0,
+            "y_change": 0,
+            "snake_list": [[SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2]],
+            "snake_length": 1,
+            "score": 0,
+            "direction": None,
+            "controls": {
+                "UP": pygame.K_w,
+                "DOWN": pygame.K_s,
+                "LEFT": pygame.K_a,
+                "RIGHT": pygame.K_d
+            }
+        },
+        {
+            "color": BLUE,
+            "x": (3 * SCREEN_WIDTH) / 4,
+            "y": SCREEN_HEIGHT / 2,
+            "x_change": 0,
+            "y_change": 0,
+            "snake_list": [[(3 * SCREEN_WIDTH) / 4, SCREEN_HEIGHT / 2]],
+            "snake_length": 1,
+            "score": 0,
+            "direction": None,
+            "controls": {
+                "UP": pygame.K_UP,
+                "DOWN": pygame.K_DOWN,
+                "LEFT": pygame.K_LEFT,
+                "RIGHT": pygame.K_RIGHT
+            }
+        }
+    ]
+
+    # Comida y obstáculos
+    food_positions = [generate_food()]
+    obstacle_positions = []
+    obstacle_directions = []
+    obstacle_tick = 0
 
     while not game_over:
         while game_close:
             game_display.fill(BLACK)
-            message("¡HAS PERDIDO!", RED, SCREEN_HEIGHT / 1.25, SCREEN_HEIGHT / 5.5)
-            message(f"Puntuación Jugador 1: {score1}", GREEN, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2.5)
-            message(f"Puntuación Jugador 2: {score2}", BLUE, SCREEN_WIDTH * 3 / 4 - 200, SCREEN_HEIGHT / 2.5)
-            message("Pulsa C para iniciar otra partida o Q para salir al menú principal.", RED, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 1.5)
+            message("¡FIN DEL JUEGO!", RED, SCREEN_WIDTH / 3, SCREEN_HEIGHT / 4)
+            for i, player in enumerate(players):
+                message(f"Jugador {i + 1}: {player['score']} puntos", player["color"], SCREEN_WIDTH / 3,
+                        SCREEN_HEIGHT / 2.5 + i * 40)
+            message("Pulsa C para reiniciar o Q para salir.", RED, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 1.5)
             pygame.display.update()
 
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         pygame.quit()
-                        window.deiconify()  
+                        window.deiconify()
                         return
                     if event.key == pygame.K_c:
                         gameLoop(window)
@@ -80,95 +137,93 @@ def gameLoop(window):
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT and direction1 != "RIGHT":
-                    x1_change, y1_change = -BLOCK_SIZE, 0
-                    direction1 = "LEFT"
-                elif event.key == pygame.K_RIGHT and direction1 != "LEFT":
-                    x1_change, y1_change = BLOCK_SIZE, 0
-                    direction1 = "RIGHT"
-                elif event.key == pygame.K_UP and direction1 != "DOWN":
-                    x1_change, y1_change = 0, -BLOCK_SIZE
-                    direction1 = "UP"
-                elif event.key == pygame.K_DOWN and direction1 != "UP":
-                    x1_change, y1_change = 0, BLOCK_SIZE
-                    direction1 = "DOWN"
-                elif event.key == pygame.K_a and direction2 != "RIGHT":
-                    x2_change, y2_change = -BLOCK_SIZE, 0
-                    direction2 = "LEFT"
-                elif event.key == pygame.K_d and direction2 != "LEFT":
-                    x2_change, y2_change = BLOCK_SIZE, 0
-                    direction2 = "RIGHT"
-                elif event.key == pygame.K_w and direction2 != "DOWN":
-                    x2_change, y2_change = 0, -BLOCK_SIZE
-                    direction2 = "UP"
-                elif event.key == pygame.K_s and direction2 != "UP":
-                    x2_change, y2_change = 0, BLOCK_SIZE
-                    direction2 = "DOWN"
-
-        if x1 >= SCREEN_WIDTH or x1 < 0 or y1 >= SCREEN_HEIGHT or y1 < 0:
-            game_close = True
-        if x2 >= SCREEN_WIDTH or x2 < 0 or y2 >= SCREEN_HEIGHT or y2 < 0:
-            game_close = True
-
-        x1 += x1_change
-        y1 += y1_change
-        x2 += x2_change
-        y2 += y2_change
+                for player in players:
+                    controls = player["controls"]
+                    if event.key == controls["LEFT"] and player["direction"] != "RIGHT":
+                        player["x_change"] = -BLOCK_SIZE
+                        player["y_change"] = 0
+                        player["direction"] = "LEFT"
+                    elif event.key == controls["RIGHT"] and player["direction"] != "LEFT":
+                        player["x_change"] = BLOCK_SIZE
+                        player["y_change"] = 0
+                        player["direction"] = "RIGHT"
+                    elif event.key == controls["UP"] and player["direction"] != "DOWN":
+                        player["y_change"] = -BLOCK_SIZE
+                        player["x_change"] = 0
+                        player["direction"] = "UP"
+                    elif event.key == controls["DOWN"] and player["direction"] != "UP":
+                        player["y_change"] = BLOCK_SIZE
+                        player["x_change"] = 0
+                        player["direction"] = "DOWN"
 
         game_display.fill(BLACK)
 
-        pygame.draw.rect(game_display, YELLOW, [foodx, foody, BLOCK_SIZE, BLOCK_SIZE])
+        # Dibujar comida y obstáculos
+        for foodx, foody in food_positions:
+            pygame.draw.rect(game_display, YELLOW, [foodx, foody, BLOCK_SIZE, BLOCK_SIZE])
+        for obsx, obsy in obstacle_positions:
+            pygame.draw.rect(game_display, RED, [obsx, obsy, BLOCK_SIZE, BLOCK_SIZE])
 
-        snake1_head = [x1, y1]
-        snake1_list.append(snake1_head)
-        if len(snake1_list) > snake1_length:
-            del snake1_list[0]
+        # Movimiento y lógica para cada jugador
+        for player in players:
+            player["x"] += player["x_change"]
+            player["y"] += player["y_change"]
 
-        snake2_head = [x2, y2]
-        snake2_list.append(snake2_head)
-        if len(snake2_list) > snake2_length:
-            del snake2_list[0]
-
-        for segment in snake1_list[:-1]:
-            if segment == snake1_head:
-                game_close = True
-        for segment in snake2_list[:-1]:
-            if segment == snake2_head:
+            if player["x"] >= SCREEN_WIDTH or player["x"] < 0 or player["y"] >= SCREEN_HEIGHT or player["y"] < 0:
                 game_close = True
 
-        
+            snake_head = [player["x"], player["y"]]
+            player["snake_list"].append(snake_head)
 
-        def check_collision(pos1, pos2, tolerance=10):
-            return abs(pos1[0] - pos2[0]) <= tolerance and abs(pos1[1] - pos2[1]) <= tolerance
-        
+            if len(player["snake_list"]) > player["snake_length"]:
+                del player["snake_list"][0]
 
-        for segment in snake1_list:
-            if check_collision(segment, snake2_head):
-                game_close = True
-        for segment in snake2_list:
-            if check_collision(segment, snake1_head):
-                game_close = True
+            for segment in player["snake_list"][:-1]:
+                if check_collision(segment, snake_head):
+                    game_close = True
 
+            draw_snake(BLOCK_SIZE, player["snake_list"], player["color"])
 
+            for foodx, foody in food_positions[:]:
+                if check_collision((player["x"], player["y"]), (foodx, foody)):
+                    food_positions.remove((foodx, foody))
+                    vibrate_screen()
+                    player["snake_length"] += 1
+                    player["score"] += 1
+                    food_positions.append(generate_food())
 
-        draw_snake(BLOCK_SIZE, snake1_list, GREEN)
-        draw_snake(BLOCK_SIZE, snake2_list, BLUE)
+                    # Generar un obstáculo cada vez que un jugador coma comida
+                    if len(obstacle_positions) < 5:  # Limitar el número de obstáculos en pantalla
+                        obstacle_positions.append(generate_food())
+                        obstacle_directions.append(random.choice(["HORIZONTAL", "VERTICAL"]))
 
-        if x1 - BLOCK_SIZE <= foodx <= x1 + BLOCK_SIZE and y1 - BLOCK_SIZE <= foody <= y1 + BLOCK_SIZE:
-            foodx, foody = generate_food()
-            snake1_length += 1
-            score1 += 1
-        if x2 - BLOCK_SIZE <= foodx <= x2 + BLOCK_SIZE and y2 - BLOCK_SIZE <= foody <= y2 + BLOCK_SIZE:
-            foodx, foody = generate_food()
-            snake2_length += 1
-            score2 += 1
+        # Mover obstáculos a mitad de velocidad
+        obstacle_tick += 1
+        if obstacle_tick >= 2:  # Controlamos la velocidad de movimiento de los obstáculos
+            for i in range(len(obstacle_positions)):
+                obsx, obsy = obstacle_positions[i]
+                direction = obstacle_directions[i]
+                if direction == "HORIZONTAL":
+                    obsx += random.choice([-BLOCK_SIZE, BLOCK_SIZE])
+                    obsx = max(0, min(obsx, SCREEN_WIDTH - BLOCK_SIZE))
+                elif direction == "VERTICAL":
+                    obsy += random.choice([-BLOCK_SIZE, BLOCK_SIZE])
+                    obsy = max(0, min(obsy, SCREEN_HEIGHT - BLOCK_SIZE))
+                obstacle_positions[i] = (obsx, obsy)
+            obstacle_tick = 0
 
-        score_text1 = score_font.render("Jugador 1: " + str(score1), True, GREEN)
-        score_text2 = score_font.render("Jugador 2: " + str(score2), True, BLUE)
-        game_display.blit(score_text1, [10, 10])
-        game_display.blit(score_text2, [10, 50])
+        # Colisión con obstáculos
+        for obsx, obsy in obstacle_positions:
+            for player in players:
+                if check_collision((player["x"], player["y"]), (obsx, obsy)):
+                    game_close = True
+
+        # Mostrar puntuación
+        for i, player in enumerate(players):
+            score_text = score_font.render(f"Jugador {i + 1}: {player['score']}", True, WHITE)
+            game_display.blit(score_text, [10, 40 * i])
+
         pygame.display.update()
-
         clock.tick(15)
 
     pygame.quit()
