@@ -1,6 +1,6 @@
 import pygame
 import random
-import rotatescreen
+import time
 
 def gameLoop(window):
     pygame.init()
@@ -37,14 +37,18 @@ def gameLoop(window):
             round(random.randrange(0, SCREEN_HEIGHT - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
         )
 
-    # Inicializar rotatescreen
-    screen = rotatescreen.get_primary_display()
-
+    # Vibración no bloqueante
     def vibrate_screen():
-        if screen:
-            screen.rotate_to(90)
-            screen.rotate_to(270)
-            screen.rotate_to(0)
+        offsets = [(-10, 0), (10, 0), (0, -10), (0, 10)]
+        original = game_display.copy()
+        vibration_start = time.time()
+        while time.time() - vibration_start < 0.2:  # Vibrar durante 3 segundos
+            for dx, dy in offsets:
+                game_display.blit(original, (dx, dy))
+                pygame.display.update()
+                pygame.time.wait(50)  # Corto retraso para simular la vibración
+                game_display.blit(original, (0, 0))
+                pygame.display.update()
 
     game_over = False
     game_close = False
@@ -59,9 +63,12 @@ def gameLoop(window):
     snake_list = [[x1, y1]]
 
     score = 0
-    direction = None  
+    current_direction = None  
 
     food_positions = [generate_food()]  # Lista inicial de bloques de comida
+    obstacle_positions = []  # Lista de posiciones de obstáculos
+    obstacle_directions = []  # Lista de direcciones para cada obstáculo
+    obstacle_tick = 0  # Contador para reducir la velocidad de movimiento de los obstáculos
 
     while not game_over:
         while game_close:
@@ -84,22 +91,23 @@ def gameLoop(window):
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT and direction != "RIGHT":
+                # Evitar cambios opuestos de dirección
+                if event.key == pygame.K_LEFT and current_direction != "RIGHT":
                     x1_change = -BLOCK_SIZE
                     y1_change = 0
-                    direction = "LEFT"
-                elif event.key == pygame.K_RIGHT and direction != "LEFT":
+                    current_direction = "LEFT"
+                elif event.key == pygame.K_RIGHT and current_direction != "LEFT":
                     x1_change = BLOCK_SIZE
                     y1_change = 0
-                    direction = "RIGHT"
-                elif event.key == pygame.K_UP and direction != "DOWN":
+                    current_direction = "RIGHT"
+                elif event.key == pygame.K_UP and current_direction != "DOWN":
                     y1_change = -BLOCK_SIZE
                     x1_change = 0
-                    direction = "UP"
-                elif event.key == pygame.K_DOWN and direction != "UP":
+                    current_direction = "UP"
+                elif event.key == pygame.K_DOWN and current_direction != "UP":
                     y1_change = BLOCK_SIZE
                     x1_change = 0
-                    direction = "DOWN"
+                    current_direction = "DOWN"
 
         if x1 >= SCREEN_WIDTH or x1 < 0 or y1 >= SCREEN_HEIGHT or y1 < 0:
             game_close = True
@@ -110,6 +118,9 @@ def gameLoop(window):
 
         for foodx, foody in food_positions:
             pygame.draw.rect(game_display, YELLOW, [foodx, foody, BLOCK_SIZE, BLOCK_SIZE])
+
+        for obsx, obsy in obstacle_positions:
+            pygame.draw.rect(game_display, RED, [obsx, obsy, BLOCK_SIZE, BLOCK_SIZE])
 
         snake_head = [x1, y1]
         snake_list.append(snake_head)
@@ -129,14 +140,31 @@ def gameLoop(window):
                 vibrate_screen()
                 snake_length += 1
                 score += 1
-                new_blocks = random.randint(1, 3)
-                for _ in range(new_blocks):
-                    food_positions.append(generate_food())
+                food_positions.append(generate_food())  # Generar nueva manzana
+                new_obstacles = random.randint(1, 3)
+                for _ in range(new_obstacles):
+                    obstacle_positions.append(generate_food())
+                    obstacle_directions.append(random.choice(["HORIZONTAL", "VERTICAL"]))
 
-        if len(snake_list) > 2:  # Reducción de la serpiente
-            reduction_rate = max(1, score // 10)  # Incrementa la reducción según la puntuación
-            if len(snake_list) > snake_length - reduction_rate:
-                del snake_list[0]
+        # Movimiento de obstáculos a mitad de velocidad
+        obstacle_tick += 1
+        if obstacle_tick >= 2:  # Reducir la velocidad en comparación con la serpiente
+            for i in range(len(obstacle_positions)):
+                obsx, obsy = obstacle_positions[i]
+                direction = obstacle_directions[i]
+                if direction == "HORIZONTAL":
+                    obsx += random.choice([-BLOCK_SIZE, BLOCK_SIZE])
+                    obsx = max(0, min(obsx, SCREEN_WIDTH - BLOCK_SIZE))
+                elif direction == "VERTICAL":
+                    obsy += random.choice([-BLOCK_SIZE, BLOCK_SIZE])
+                    obsy = max(0, min(obsy, SCREEN_HEIGHT - BLOCK_SIZE))
+                obstacle_positions[i] = (obsx, obsy)
+            obstacle_tick = 0
+
+        # Verificar colisiones con obstáculos
+        for obsx, obsy in obstacle_positions:
+            if x1 == obsx and y1 == obsy:
+                game_close = True
 
         score_text = score_font.render("Puntuación: " + str(score), True, WHITE)
         game_display.blit(score_text, [10, 10])
