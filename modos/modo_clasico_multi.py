@@ -59,10 +59,10 @@ def gameLoop(window):
     while not game_over:
         while game_close:
             game_display.fill(BLACK)
-            message("¡HAS PERDIDO!", RED, SCREEN_HEIGHT / 1.25, SCREEN_HEIGHT / 5.5)
-            message(f"PUNTUACION PLAYER 1: {score1}", GREEN, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2.5)
-            message(f"PUNTUACION PLAYER 2: {score2}", BLUE, SCREEN_WIDTH * 3 / 4 - 200, SCREEN_HEIGHT / 2.5)
-            message("C (INICIAR) / Q (SALIR)", RED, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 1.5)
+            message("¡HAS PERDIDO!", RED, SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 5.5)
+            message(f"PLAYER 1: {score1} PTS", GREEN, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2.5)
+            message(f"PLAYER 2: {score2} PTS", BLUE, SCREEN_WIDTH * 3 / 4 - 200, SCREEN_HEIGHT / 2.5)
+            message("C (INICIAR) / Q (SALIR)", RED, SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 1.75)
             pygame.display.update()
 
             for event in pygame.event.get():

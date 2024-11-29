@@ -1,12 +1,12 @@
 from tkinter import *
-import random
+from PIL import Image, ImageTk
 from tkinter import font
 from modos.modo_obstaculos import gameLoop as gameLoopObstaculos
 from modos.modo_obstaculos_multi import gameLoop as gameLoopObstaculosMulti
 from modos.modo_clasico import gameLoop as gameLoopClasico
 from modos.modo_clasico_multi import gameLoop as gameLoopClasicoMulti
-from modos.modo_extremo import gameLoop as gameLoopExtremo
-from modos.modo_extremo_multi import gameLoop as gameLoopExtremoMulti
+from modos.modo_caos import gameLoop as gameLoopExtremo
+from modos.modo_caos_multi import gameLoop as gameLoopExtremoMulti
 
 def on_enter(event):
     event.widget.config(bg="#6c777e", fg="white")
@@ -112,39 +112,20 @@ def pantalla_inicio():
     botonconfig.bind("<Enter>", on_enter)
     botonconfig.bind("<Leave>", on_leave)
 
-BACKGROUND_COLOR = "#212121"
 window = Tk()
 window.title("Juego de la serpiente")
 width = window.winfo_screenwidth()
 height = window.winfo_screenheight()
 window.geometry("%dx%d" % (width, height))
 WIDTH, HEIGHT = width, height
-canvas = Canvas(window, width=WIDTH, height=HEIGHT, bg="black")
-canvas.pack()
 
-# Dibujar la cuadrícula neón
-def draw_neon_grid(canvas, width, height, cell_size):
-    neon_color = "#00FF00"  # Verde neón
-    for x in range(0, width, cell_size):
-        canvas.create_line(x, 0, x, height, fill=neon_color, width=1)
-    for y in range(0, height, cell_size):
-        canvas.create_line(0, y, width, y, fill=neon_color, width=1)
 
-# Añadir estrellas al fondo
-def add_stars(canvas, width, height, num_stars):
-    for _ in range(num_stars):
-        x, y = random.randint(0, width), random.randint(0, height)
-        canvas.create_oval(x, y, x + 2, y + 2, fill="white")
 
-# Dibujar cuadrícula y estrellas
-CELL_SIZE = 20
-draw_neon_grid(canvas, WIDTH, HEIGHT, CELL_SIZE)
-add_stars(canvas, WIDTH, HEIGHT, 50)
-
-#window.config(bg=BACKGROUND_COLOR)
-
-window.iconbitmap('snake-game\logo.ico')
-
+window.config(bg = "#1A1A1D")
 pantalla_inicio()
+
+window.iconbitmap('logo.ico')
+#pantalla_inicio()
+
 
 window.mainloop()

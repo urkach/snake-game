@@ -117,11 +117,11 @@ def gameLoop(window):
     while not game_over:
         while game_close:
             game_display.fill(BLACK)
-            message("¡FIN DEL JUEGO!", RED, SCREEN_WIDTH / 3, SCREEN_HEIGHT / 4)
+            message("¡FIN DEL JUEGO!", RED, SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 4)
             for i, player in enumerate(players):
-                message(f"PLAYER {i + 1}: {player['score']} PUNTOS", player["color"], SCREEN_WIDTH / 3,
+                message(f"PLAYER {i + 1}: {player['score']} PTS", player["color"], SCREEN_WIDTH / 2.85,
                         SCREEN_HEIGHT / 2.5 + i * 40)
-            message("C (INICIAR) / Q (SALIR)", RED, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 1.5)
+            message("C (INICIAR) / Q (SALIR)", RED,  SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 1.75)
             pygame.display.update()
 
             for event in pygame.event.get():
