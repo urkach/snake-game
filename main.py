@@ -143,7 +143,7 @@ add_stars(canvas, WIDTH, HEIGHT, 50)
 
 #window.config(bg=BACKGROUND_COLOR)
 
-window.iconbitmap('snake-game\logo.ico')
+window.iconbitmap('logo.ico')
 
 pantalla_inicio()
 
