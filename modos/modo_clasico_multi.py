@@ -60,9 +60,9 @@ def gameLoop(window):
         while game_close:
             game_display.fill(BLACK)
             message("¡HAS PERDIDO!", RED, SCREEN_HEIGHT / 1.25, SCREEN_HEIGHT / 5.5)
-            message(f"Puntuación Jugador 1: {score1}", GREEN, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2.5)
-            message(f"Puntuación Jugador 2: {score2}", BLUE, SCREEN_WIDTH * 3 / 4 - 200, SCREEN_HEIGHT / 2.5)
-            message("Pulsa C para iniciar otra partida o Q para salir al menú principal.", RED, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 1.5)
+            message(f"PUNTUACION PLAYER 1: {score1}", GREEN, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2.5)
+            message(f"PUNTUACION PLAYER 2: {score2}", BLUE, SCREEN_WIDTH * 3 / 4 - 200, SCREEN_HEIGHT / 2.5)
+            message("C (INICIAR) / Q (SALIR)", RED, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 1.5)
             pygame.display.update()
 
             for event in pygame.event.get():
@@ -161,8 +161,8 @@ def gameLoop(window):
             snake2_length += 1
             score2 += 1
 
-        score_text1 = score_font.render("Jugador 1: " + str(score1), True, GREEN)
-        score_text2 = score_font.render("Jugador 2: " + str(score2), True, BLUE)
+        score_text1 = score_font.render("PLAYER 1: " + str(score1), True, GREEN)
+        score_text2 = score_font.render("PLAYER 2: " + str(score2), True, BLUE)
         game_display.blit(score_text1, [10, 10])
         game_display.blit(score_text2, [10, 50])
         pygame.display.update()

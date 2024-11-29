@@ -90,9 +90,9 @@ def gameLoop(window):
     while not game_over:
         while game_close:
             game_display.fill(BLACK)
-            message("¡HAS PERDIDO!", RED, SCREEN_HEIGHT / 1.25, SCREEN_HEIGHT / 5.5)
-            message(f"Tu puntuación ha sido: {score}", RED, SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 2.5)
-            message("Pulsa C para iniciar otra partida o Q para salir al menu principal.", RED, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 1.5)
+            message("¡HAS PERDIDO!", RED, SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 2.5)
+            message(f"PUNTUACION:: {score}", RED, SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 2.5)
+            message("C (INICIAR) / Q (SALIR)", RED, SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 1.75)
             pygame.display.update()
 
             for event in pygame.event.get():
@@ -183,7 +183,7 @@ def gameLoop(window):
             if check_collision((x1, y1), (obsx, obsy)):
                 game_close = True
 
-        score_text = score_font.render("Puntuación: " + str(score), True, WHITE)
+        score_text = score_font.render("PUNTUACION: " + str(score), True, WHITE)
         game_display.blit(score_text, [10, 10])
         pygame.display.update()
 
