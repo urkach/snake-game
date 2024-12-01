@@ -171,11 +171,6 @@ def pantalla_inicio():
     botonconfig.bind("<Enter>", on_enter)
     botonconfig.bind("<Leave>", on_leave)
 
-    my_button = Button(window, text="PLAY", command=play, height=2, width=10, bg="#343030", fg="white", font=("Press Start 2P", 12))
-    my_button.place(relx=0.08, rely=0.9, anchor='center')
-
-    stop_button = Button(window, text="STOP", command=stop, height=2, width=10, bg="#343030", fg="white", font=("Press Start 2P", 12))
-    stop_button.place(relx=0.2, rely=0.9, anchor='center')
 
 
 window = Tk()
