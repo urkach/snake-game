@@ -50,9 +50,13 @@ def seleccionar_tipo_juego(normal_mode, multi_mode):
     boton_atras.bind("<Enter>", on_enter)
     boton_atras.bind("<Leave>", on_leave)
 
+
 def iniciar_juego(modo_juego):
+    pygame.mixer.music.load('Audio/cyberpunk_audio.mp3')  # Inicia la música al entrar en el juego
+    pygame.mixer.music.play(loops=-1)
     window.withdraw()
     modo_juego(window)
+
 
 def obstaculos():
     seleccionar_tipo_juego(gameLoopObstaculos, gameLoopObstaculosMulti)
@@ -121,13 +125,6 @@ def pantalla_inicio():
     botonconfig.bind("<Enter>", on_enter)
     botonconfig.bind("<Leave>", on_leave)
 
-    my_button = Button (window, text="PLAY", command = play, height=2, width=10, bg="#343030", fg="white", font=("Press Start 2P", 12))
-    my_button.place(relx=0.08, rely=0.9, anchor='center')
-
-    stop_button = Button(window, text="STOP", command = stop, height=2, width=10, bg="#343030", fg="white", font=("Press Start 2P", 12))
-    stop_button.place(relx=0.2, rely=0.9, anchor='center')
-
-
 
 
     
@@ -150,5 +147,4 @@ pantalla_inicio()
 
 
 
-play()
 window.mainloop()

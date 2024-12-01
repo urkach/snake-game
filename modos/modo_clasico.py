@@ -57,8 +57,9 @@ def gameLoop(window):
 
     while not game_over:
         while game_close:
+            pygame.mixer.music.stop()  # Detén la música al perder
             game_display.fill(BLACK)
-            message("¡HAS PERDIDO!", RED,  SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 5)
+            message("¡HAS PERDIDO!", RED, SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 5)
             message(f"PUNTUACION: {score}", RED, SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 2.5)
             message("C (INICIAR) / Q (SALIR)", RED, SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 1.75)
             pygame.display.update()
@@ -66,21 +67,17 @@ def gameLoop(window):
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
-
                         times = pygame.mixer.music.get_pos()
                         pygame.quit()
                         window.deiconify()
                         pygame.mixer.init()
-                        pygame.mixer.music.load('Audio\cyberpunk_audio.mp3')
-                        pygame.mixer.music.play(loops = -1)
+                        pygame.mixer.music.load('Audio/cyberpunk_audio.mp3')
+                        pygame.mixer.music.play(loops=-1)
                         pygame.mixer.music.rewind()
                         pygame.mixer.music.set_pos(times / 1000)
-                        
-                        
-
-  
                         return
                     if event.key == pygame.K_c:
+                        pygame.mixer.music.play(loops=-1)  # Reanuda la música al reiniciar
                         gameLoop(window)
 
         for event in pygame.event.get():
