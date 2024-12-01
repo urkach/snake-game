@@ -1,9 +1,9 @@
 import pygame
 import random
 
-
 def gameLoop(window):
     pygame.init()
+    pygame.mixer.init()
 
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
@@ -68,8 +68,14 @@ def gameLoop(window):
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
+                        times = pygame.mixer.music.get_pos()
                         pygame.quit()
-                        window.deiconify()  
+                        window.deiconify()
+                        pygame.mixer.init()
+                        pygame.mixer.music.load('Audio\cyberpunk_audio.mp3')
+                        pygame.mixer.music.play(loops = -1)
+                        pygame.mixer.music.rewind()
+                        pygame.mixer.music.set_pos(times / 1000) 
                         return
                     if event.key == pygame.K_c:
                         gameLoop(window)

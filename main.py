@@ -1,6 +1,6 @@
 from tkinter import *
-from PIL import Image, ImageTk
 from tkinter import font
+import pygame
 from modos.modo_obstaculos import gameLoop as gameLoopObstaculos
 from modos.modo_obstaculos_multi import gameLoop as gameLoopObstaculosMulti
 from modos.modo_clasico import gameLoop as gameLoopClasico
@@ -14,13 +14,22 @@ def on_enter(event):
 def on_leave(event):
     event.widget.config(bg="#343030", fg="white")
 
+def play():
+    pygame.mixer.music.load('Audio\cyberpunk_audio.mp3')
+    pygame.mixer.music.play(loops = -1)
+
+def stop():
+    pygame.mixer.music.stop()
+
+
 def seleccionar_tipo_juego(normal_mode, multi_mode):
     for widget in window.winfo_children():
         widget.destroy()
+    
 
     window.title("Seleccionar Tipo de Juego")
     nuevo_label = Label(window, text="¿SOLO / MULTIJUGADOR?")
-    nuevo_label.config(font=("Press Start 2P", 20), fg="white", bg="#343030")
+    nuevo_label.config(font=("Press Start 2P", 30), fg="white", bg="#343030")
     nuevo_label.pack(pady=40)
 
     boton_normal = Button(window, text="SOLO", height=10, width=20, command=lambda: iniciar_juego(normal_mode),
@@ -60,7 +69,7 @@ def modos_de_juego():
 
     window.title("Modos de Juego")
     nuevo_label = Label(window, text="MODO JUEGO")
-    nuevo_label.config(font=("Press Start 2P", 24), fg="white", bg="#343030")
+    nuevo_label.config(font=("Press Start 2P", 30), fg="white", bg="#343030")
     nuevo_label.pack()
 
     boton_modo1 = Button(window, text="CLASSIC", height=10, width=20, command=clasico,
@@ -93,7 +102,7 @@ def pantalla_inicio():
 
     window.title("SNAKE GAME")
     
-    label = Label(window, text="SNAKE GAME", font=("Press Start 2P", 24), fg="white", bg="#343030")
+    label = Label(window, text="SNAKE GAME", font=("Press Start 2P", 40), fg="white", bg="#343030")
     label.pack()
 
     botonplay = Button(window, text="JUGAR", height=10, width=20, command=modos_de_juego,
@@ -112,20 +121,34 @@ def pantalla_inicio():
     botonconfig.bind("<Enter>", on_enter)
     botonconfig.bind("<Leave>", on_leave)
 
+    my_button = Button (window, text="PLAY", command = play, height=2, width=10, bg="#343030", fg="white", font=("Press Start 2P", 12))
+    my_button.place(relx=0.08, rely=0.9, anchor='center')
+
+    stop_button = Button(window, text="STOP", command = stop, height=2, width=10, bg="#343030", fg="white", font=("Press Start 2P", 12))
+    stop_button.place(relx=0.2, rely=0.9, anchor='center')
+
+
+
+
+    
+
 window = Tk()
 window.title("Juego de la serpiente")
 width = window.winfo_screenwidth()
 height = window.winfo_screenheight()
 window.geometry("%dx%d" % (width, height))
 WIDTH, HEIGHT = width, height
-
-
-
 window.config(bg = "#1A1A1D")
+window.resizable(False, False)
+window.iconbitmap('logo.ico')
+
+
+pygame.mixer.init()
+
+
 pantalla_inicio()
 
-window.iconbitmap('logo.ico')
-#pantalla_inicio()
 
 
+play()
 window.mainloop()
