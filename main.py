@@ -100,8 +100,10 @@ def seleccionar_tipo_juego(normal_mode, multi_mode):
     boton_atras.bind("<Leave>", on_leave)
 
 def iniciar_juego(modo_juego):
+    play()  # Reproduce la música cuando comienza el juego
     window.withdraw()
     modo_juego(window)
+    pygame.mixer.music.stop()  # Detener la música al salir del juego
 
 def obstaculos():
     seleccionar_tipo_juego(gameLoopObstaculos, gameLoopObstaculosMulti)
@@ -171,21 +173,12 @@ def pantalla_inicio():
     botonconfig.bind("<Enter>", on_enter)
     botonconfig.bind("<Leave>", on_leave)
 
-
-
 window = Tk()
 window.title("Juego de la serpiente")
 width = window.winfo_screenwidth()
 height = window.winfo_screenheight()
-window.geometry("%dx%d" % (width, height))
-WIDTH, HEIGHT = width, height
-window.config(bg="#1A1A1D")
-window.resizable(False, False)
-window.iconbitmap('logo.ico')
-
+window.geometry(f"{width}x{height}")
 pygame.mixer.init()
 
 pantalla_inicio()
-
-play()
 window.mainloop()
