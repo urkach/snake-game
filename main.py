@@ -77,7 +77,7 @@ def seleccionar_tipo_juego(normal_mode, multi_mode):
         widget.destroy()
 
     window.title("Seleccionar Tipo de Juego")
-    nuevo_label = Label(window, text="¿SOLO / MULTIJUGADOR?")
+    nuevo_label = Label(window, text="¿SOLO / MULTIJUGADOR?", font=("Press Start 2P", 30), fg="white", bg="#343030")
     nuevo_label.config(font=("Press Start 2P", 30), fg="white", bg="#343030")
     nuevo_label.pack(pady=40)
 
@@ -119,7 +119,7 @@ def modos_de_juego():
         widget.destroy()
 
     window.title("Modos de Juego")
-    nuevo_label = Label(window, text="MODO JUEGO")
+    nuevo_label = Label(window, text="MODO JUEGO", font=("Press Start 2P", 30), fg="white", bg="#343030")
     nuevo_label.config(font=("Press Start 2P", 30), fg="white", bg="#343030")
     nuevo_label.pack()
 
@@ -152,7 +152,8 @@ def pantalla_inicio():
         widget.destroy()
 
     window.title("SNAKE GAME")
-    
+    window.config(bg="#343030")
+
     label = Label(window, text="SNAKE GAME", font=("Press Start 2P", 40), fg="white", bg="#343030")
     label.pack()
 
