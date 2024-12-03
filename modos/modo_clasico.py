@@ -1,5 +1,35 @@
 import pygame
 import random
+monedas=0
+def cargar_monedas(): 
+    global monedas
+    try:
+        with open("monedas.txt", "r") as file:
+            monedas = int(file.read())
+    except FileNotFoundError:
+        monedas = 0
+
+def guardar_monedas():
+    with open("monedas.txt", "w") as file:
+        file.write(str(monedas))
+
+def actualizar_monedas():
+    print(f"monedas:{monedas}")
+    guardar_monedas()
+
+def comer_fruta():
+    global monedas
+    monedas+= 1
+    actualizar_monedas()
+
+def cargar_skin_actual():
+    global skin_actual
+    try: 
+        with open("skin_actual.txt", "r") as file: 
+            skin_actual = file.read().strip() 
+    except FileNotFoundError: 
+        skin_actual = "green"
+
 def gameLoop(window):
     
     pygame.init()
@@ -22,14 +52,15 @@ def gameLoop(window):
 
     font_style = pygame.font.SysFont("Cascadia Code PL, monospace", 25, bold=True)
     score_font = pygame.font.SysFont("Cascadia Code PL, monospace", 35, bold=True)
+    moneda_font = pygame.font.SysFont("Cascadia Code PL, monospace", 35, bold=True) 
 
     def message(msg, color, x, y):
         mesg = font_style.render(msg, True, color)
         game_display.blit(mesg, [x, y])
 
-    def draw_snake(block_size, snake_list):
+    def draw_snake(block_size, snake_list,skin_color):
         for x in snake_list:
-            pygame.draw.rect(game_display, GREEN, [x[0], x[1], block_size, block_size])
+            pygame.draw.rect(game_display, skin_color, [x[0], x[1], block_size, block_size])
 
     game_over = False
     game_close = False
@@ -54,6 +85,9 @@ def gameLoop(window):
         )
 
     foodx, foody = generate_food()
+
+    cargar_monedas()
+    cargar_skin_actual()
 
     while not game_over:
         while game_close:
@@ -121,14 +155,17 @@ def gameLoop(window):
             if segment == snake_head:
                 game_close = True
 
-        draw_snake(BLOCK_SIZE, snake_list)
+        draw_snake(BLOCK_SIZE, snake_list, skin_actual)
         if x1 - BLOCK_SIZE <= foodx <= x1 + BLOCK_SIZE and y1 - BLOCK_SIZE <= foody <= y1 + BLOCK_SIZE:
             foodx, foody = generate_food()
             snake_length += 1
             score += 1
+            comer_fruta()
 
         score_text = score_font.render("PUNTUACION: " + str(score), True, WHITE)
+        monedas_text = moneda_font.render("Monedas: " + str(monedas), True, YELLOW)
         game_display.blit(score_text, [10, 10])
+        game_display.blit(monedas_text, [10,50])
         pygame.display.update()
 
         clock.tick(15)

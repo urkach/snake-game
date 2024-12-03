@@ -2,6 +2,37 @@ import pygame
 import random
 import time
 
+monedas=0
+def cargar_monedas(): 
+    global monedas
+    try:
+        with open("monedas.txt", "r") as file:
+            monedas = int(file.read())
+    except FileNotFoundError:
+        monedas = 0
+        
+def guardar_monedas():
+    with open("monedas.txt", "w") as file:
+        file.write(str(monedas))
+
+def actualizar_monedas():
+    print(f"monedas:{monedas}")
+    guardar_monedas()
+
+def comer_fruta():
+    global monedas
+    monedas+= 1
+    actualizar_monedas()
+
+def cargar_skin_actual():
+    global skin_actual
+    try: 
+        with open("skin_actual.txt", "r") as file: 
+            skin_actual = file.read().strip() 
+    except FileNotFoundError: 
+        skin_actual = "green"
+
+
 def gameLoop(window):
     pygame.init()
     pygame.mixer.init()
@@ -23,21 +54,23 @@ def gameLoop(window):
 
     font_style = pygame.font.SysFont("Cascadia Code PL, monospace", 25, bold=True)
     score_font = pygame.font.SysFont("Cascadia Code PL, monospace", 35, bold=True)
+    moneda_font = pygame.font.SysFont("Cascadia Code PL, monospace", 35, bold=True) 
 
     def message(msg, color, x, y):
         mesg = font_style.render(msg, True, color)
         game_display.blit(mesg, [x, y])
 
-    def draw_snake(block_size, snake_list):
+    def draw_snake(block_size, snake_list,skin_color):
         for x in snake_list:
-            pygame.draw.rect(game_display, GREEN, [x[0], x[1], block_size, block_size])
+            pygame.draw.rect(game_display, skin_color, [x[0], x[1], block_size, block_size])
 
     def generate_food():
         return (
             round(random.randrange(0, SCREEN_WIDTH - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
             round(random.randrange(0, SCREEN_HEIGHT - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
         )
-
+    cargar_monedas()
+    cargar_skin_actual()
     # Nueva función para verificar colisiones exactas
     def check_collision(pos1, pos2, size=BLOCK_SIZE):
         """
@@ -157,7 +190,7 @@ def gameLoop(window):
             if check_collision(segment, snake_head):
                 game_close = True
 
-        draw_snake(BLOCK_SIZE, snake_list)
+        draw_snake(BLOCK_SIZE, snake_list,skin_actual)
 
         for foodx, foody in food_positions[:]:
             if check_collision((x1, y1), (foodx, foody)):
@@ -192,7 +225,9 @@ def gameLoop(window):
                 game_close = True
 
         score_text = score_font.render("PUNTUACION: " + str(score), True, WHITE)
+        monedas_text = moneda_font.render("Monedas: " + str(monedas), True, YELLOW)
         game_display.blit(score_text, [10, 10])
+        game_display.blit(monedas_text, [10,50])
         pygame.display.update()
 
         clock.tick(15)

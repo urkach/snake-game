@@ -7,12 +7,77 @@ from modos.modo_clasico import gameLoop as gameLoopClasico
 from modos.modo_clasico_multi import gameLoop as gameLoopClasicoMulti
 from modos.modo_caos import gameLoop as gameLoopExtremo
 from modos.modo_caos_multi import gameLoop as gameLoopExtremoMulti
+from tkinter import messagebox
+from PIL import Image, ImageTk
+
+monedas = 0 
+skins = ["chill snake", "blue wise snake", "red dead snake"]
+imagenes_skins=["skins_images/yellow.png", "skins_images/blue.png", "skins_images/red.png"]
+precios_skins = [10, 15, 15] 
+colores_skins=["yellow","blue","red"]
+skin_actual = "green"
+BACKGROUND_COLOR="#212121"
+skins_compradas=[]
+
+def cargar_monedas(): 
+    global monedas 
+    try: 
+        with open("monedas.txt", "r") as file: 
+            monedas = int(file.read()) 
+
+    except FileNotFoundError: 
+        monedas = 0 
+
+def guardar_monedas(): 
+    with open("monedas.txt", "w") as file: 
+        file.write(str(monedas))
+
+def cargar_skins_compradas():
+    global skins_compradas
+    try:
+        with open("skins_compradas.txt", "r") as file:
+            skins_compradas = file.read().splitlines()
+    except FileNotFoundError:
+        skins_compradas = []
+
+def guardar_skins_compradas():
+    with open("skins_compradas.txt", "w") as file:
+        file.write("\n".join(skins_compradas))
 
 def on_enter(event):
     event.widget.config(bg="#6c777e", fg="white")
 
 def on_leave(event):
     event.widget.config(bg="#343030", fg="white")
+
+def actualizar_monedas():
+    global label_monedas, label_monedas_tienda
+    cargar_monedas()
+    if 'label_monedas' in globals():
+        label_monedas.config(text=f"Monedas: {monedas}")
+    if 'label_monedas_tienda' in globals():
+        label_monedas_tienda.config(text=f"Monedas: {monedas}")
+    window.after(500,actualizar_monedas)
+
+def comprar_skin(skin, precio,color): 
+            global monedas, skin_actual
+            cargar_monedas()
+            cargar_skins_compradas()
+            
+            if skin in skins_compradas:
+                messagebox.showinfo("Ya comprada", f"Ya tienes la skin {skin}.")
+                return
+            if monedas >= precio: 
+                monedas -= precio
+                skins_compradas.append(skin)
+                skin_actual = color
+                guardar_monedas()
+                guardar_skins_compradas()
+                actualizar_monedas()
+                messagebox.showinfo("Compra Exitosa", f"Has comprado la skin {skin}!")
+                tienda()
+            else:
+                messagebox.showinfo("Monedas Insuficientes", "No tienes suficientes monedas.") 
 
 def play():
     pygame.mixer.music.load('Audio\cyberpunk_audio.mp3')
@@ -114,6 +179,86 @@ def clasico():
 def extremo():
     seleccionar_tipo_juego(gameLoopExtremo, gameLoopExtremoMulti)
 
+def tienda():
+    global label_monedas_tienda
+    for widget in window.winfo_children():
+        widget.destroy()
+
+    window.title("Tienda de Skins")
+
+    label_tienda = Label(window, text="Tienda de Skins", font=("Verdana", 24), fg="white", bg="#343030")
+    label_tienda.pack(pady=20)
+
+    label_monedas_tienda=Label(window,text=f"monedas: {monedas}", font=("verdana", 14),fg="white",bg="#343030")
+    label_monedas_tienda.pack(pady=10)
+
+    contenedor_skins = Frame(window, bg=BACKGROUND_COLOR)
+    contenedor_skins.pack(pady=20)
+
+    imagenes_tk = []  # Lista para las imágenes
+    for i in range(3):
+        frame_skin = Frame(contenedor_skins, bg="#212121", bd=2, relief="solid", width=400, height=800)
+        frame_skin.pack_propagate(False)
+        frame_skin.grid(row=0, column=i, padx=30, pady=(3, 20))
+
+        label_skin = Label(frame_skin, text=skins[i], bg="#212121", fg="white", font=("Verdana", 14))
+        label_skin.pack(pady=5)
+
+        try:
+            imagen_skin = Image.open(imagenes_skins[i])
+            imagen_skin = imagen_skin.resize((400, 500), Image.LANCZOS)
+            imagen_tk = ImageTk.PhotoImage(imagen_skin)
+
+            label_imagen = Label(frame_skin, image=imagen_tk, bg="#212121")
+            label_imagen.image = imagen_tk  # Mantener la referencia de la imagen
+            label_imagen.pack(pady=10)
+
+            imagenes_tk.append(imagen_tk)
+        except Exception as e:
+            label_error = Label(frame_skin, text=f"Error loading image: {e}", bg="#212121", fg="red", font=("Verdana", 10))
+            label_error.pack(pady=10)
+
+        if skins[i] in skins_compradas:
+            boton_skin = Button(frame_skin, text="Comprada", state=DISABLED, bg="#343030", fg="white", font=("Verdana", 12), height=2, width=20)
+            boton_skin.pack(pady=10)
+
+            boton_equipar = Button(frame_skin, text=f"Equipar {skins[i]}",
+                                   command=lambda color=colores_skins[i]: equipar_skin(color),
+                                   bg="#343030", fg="white", font=("Verdana", 12), height=2, width=20)
+            boton_equipar.pack(pady=10)
+        else: 
+            boton_skin = Button(frame_skin, text=f"Comprar {precios_skins[i]} monedas",
+                                  command=lambda s=skins[i], precio=precios_skins[i], color=colores_skins[i]: comprar_skin(s, precio, color),
+                                  bg="#343030", fg="white", font=("Verdana", 12), height=2, width=20)
+            boton_skin.pack(pady=10) 
+            
+    boton_atras = Button(window, text="ATRÁS", command=pantalla_inicio, bg="#343030", fg="white", font=("Verdana", 14))
+    boton_atras.pack(pady=20)
+    actualizar_monedas()
+
+def comprar_y_actualizar(skin,precio, color):
+    comprar_skin(skin, precio, color)
+    tienda()
+def equipar_skin(color):
+    global skin_actual
+    skin_actual = color
+    guardar_skin_actual()
+    messagebox.showinfo("Skin equipada", f"¡Has equipado la skin {color}!")
+    tienda()
+
+def guardar_skin_actual():
+    with open("skin_actual.txt", "w") as file:
+        file.write(skin_actual)
+
+def cargar_skin_actual():
+    global skin_actual
+    try:
+        with open("skin_actual.txt", "r") as file:
+            skin_actual = file.read().strip()
+    except FileNotFoundError:
+        skin_actual = "green" 
+
+
 def modos_de_juego():
     for widget in window.winfo_children():
         widget.destroy()
@@ -157,13 +302,18 @@ def pantalla_inicio():
     label = Label(window, text="SNAKE GAME", font=("Press Start 2P", 40), fg="white", bg="#343030")
     label.pack()
 
+    global label_monedas
+    label_monedas = Label(window, text=f"Monedas: {monedas}", font=("Verdana", 14), fg="white", bg="#343030")
+    label_monedas.pack(pady=10) 
+    actualizar_monedas()
+
     botonplay = Button(window, text="JUGAR", height=10, width=20, command=modos_de_juego,
                        bg="#343030", fg="white", font=("Press Start 2P", 12))
     botonplay.place(relx=0.5, rely=0.5, anchor='center')
     botonplay.bind("<Enter>", on_enter)
     botonplay.bind("<Leave>", on_leave)
 
-    botontienda = Button(window, text="TIENDA", height=10, width=20, bg="#343030", fg="white", font=("Press Start 2P", 12))
+    botontienda = Button(window, text="TIENDA", height=10, width=20, command=tienda, bg="#343030", fg="white", font=("Press Start 2P", 12))
     botontienda.place(relx=0.5, rely=0.25, anchor='center')
     botontienda.bind("<Enter>", on_enter)
     botontienda.bind("<Leave>", on_leave)
@@ -174,12 +324,30 @@ def pantalla_inicio():
     botonconfig.bind("<Enter>", on_enter)
     botonconfig.bind("<Leave>", on_leave)
 
+def comer_fruta():
+    global monedas
+    monedas +=1
+    guardar_monedas()
+    actualizar_monedas()
+
+def dibujar_serpiente(canvas, snake):
+    canvas.delete("all") 
+    for segment in snake:
+        canvas.create_rectangle(segment[0], segment[1], segment[0] + 10, segment[1] + 10, fill=skin_actual)
+BACKGROUND_COLOR = "#212121"
+
+
 window = Tk()
 window.title("Juego de la serpiente")
 width = window.winfo_screenwidth()
 height = window.winfo_screenheight()
 window.geometry(f"{width}x{height}")
+window.resizable(False,False)
 pygame.mixer.init()
 
+
+cargar_monedas()
+cargar_skins_compradas()
+cargar_skin_actual()
 pantalla_inicio()
 window.mainloop()

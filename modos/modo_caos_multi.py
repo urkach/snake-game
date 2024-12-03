@@ -2,6 +2,43 @@ import pygame
 import random
 import time
 
+monedas=0
+def cargar_monedas(): 
+    global monedas
+    try:
+        with open("monedas.txt", "r") as file:
+            monedas = int(file.read())
+    except FileNotFoundError:
+        monedas = 0
+        
+def guardar_monedas():
+    with open("monedas.txt", "w") as file:
+        file.write(str(monedas))
+
+def actualizar_monedas():
+    print(f"monedas:{monedas}")
+    guardar_monedas()
+
+def comer_fruta():
+    global monedas
+    monedas+= 1
+    actualizar_monedas()
+
+def cargar_skin_actual():
+    global skin_actual1, skin_actual2
+    try: 
+        with open("skin_actual.txt", "r") as file: 
+            skin_actual1 = file.read().strip() 
+    except FileNotFoundError: 
+        skin_actual1 = "green"
+
+    try:
+        with open("skin_actual2.txt", "r") as file: 
+            skin_actual2 = file.read().strip() 
+    except FileNotFoundError: 
+        skin_actual2 = "blue"
+
+
 def gameLoop(window):
     pygame.init()
     pygame.mixer.init()
@@ -26,16 +63,16 @@ def gameLoop(window):
 
     font_style = pygame.font.SysFont("Cascadia Code PL, monospace", 25, bold=True)
     score_font = pygame.font.SysFont("Cascadia Code PL, monospace", 35, bold=True)
-
+    moneda_font = pygame.font.SysFont("Cascadia Code PL, monospace", 35, bold=True)
     # Función para mostrar mensajes
     def message(msg, color, x, y):
         mesg = font_style.render(msg, True, color)
         game_display.blit(mesg, [x, y])
 
     # Dibujar serpiente
-    def draw_snake(block_size, snake_list, color):
+    def draw_snake(block_size, snake_list, skin_color):
         for x in snake_list:
-            pygame.draw.rect(game_display, color, [x[0], x[1], block_size, block_size])
+            pygame.draw.rect(game_display, skin_color, [x[0], x[1], block_size, block_size])
 
     # Generar comida en posiciones aleatorias
     def generate_food():
@@ -43,7 +80,8 @@ def gameLoop(window):
             round(random.randrange(0, SCREEN_WIDTH - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
             round(random.randrange(0, SCREEN_HEIGHT - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
         )
-
+    cargar_monedas()
+    cargar_skin_actual()
     # Verificar colisiones exactas
     def check_collision(pos1, pos2, size=BLOCK_SIZE):
         return (
@@ -191,7 +229,9 @@ def gameLoop(window):
                 if check_collision(segment, snake_head):
                     game_close = True
 
-            draw_snake(BLOCK_SIZE, player["snake_list"], player["color"])
+            def draw_snake(block_size, snake_list, skin_color): 
+                for x in snake_list:
+                    pygame.draw.rect(game_display, skin_color, [x[0], x[1], block_size, block_size])
 
             for foodx, foody in food_positions[:]:
                 if check_collision((player["x"], player["y"]), (foodx, foody)):
