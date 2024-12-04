@@ -11,9 +11,11 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 
 monedas = 0 
+label_monedas=None
+label_monedas_tienda=None
 skins = ["chill snake", "blue wise snake", "red dead snake"]
 imagenes_skins=["skins_images/yellow.png", "skins_images/blue.png", "skins_images/red.png"]
-precios_skins = [10, 15, 15] 
+precios_skins = [10, 15, 20] 
 colores_skins=["yellow","blue","red"]
 skin_actual = "green"
 BACKGROUND_COLOR="#212121"
@@ -51,13 +53,19 @@ def on_leave(event):
     event.widget.config(bg="#343030", fg="white")
 
 def actualizar_monedas():
-    global label_monedas, label_monedas_tienda
-    cargar_monedas()
-    if 'label_monedas' in globals():
-        label_monedas.config(text=f"Monedas: {monedas}")
-    if 'label_monedas_tienda' in globals():
-        label_monedas_tienda.config(text=f"Monedas: {monedas}")
-    window.after(500,actualizar_monedas)
+    global label_monedas, label_monedas_tienda 
+    cargar_monedas() 
+    try: 
+        if label_monedas and label_monedas.winfo_exists(): label_monedas.config(text=f"Monedas: {monedas}") 
+        
+    except TclError: print("label_monedas no existe.") 
+    
+    try: 
+        if label_monedas_tienda and label_monedas_tienda.winfo_exists(): label_monedas_tienda.config(text=f"Monedas: {monedas}") 
+    
+    except TclError: print("label_monedas_tienda no existe.") 
+    window.after(500, actualizar_monedas)
+
 
 def comprar_skin(skin, precio,color): 
             global monedas, skin_actual
@@ -237,8 +245,12 @@ def tienda():
                                   bg="#343030", fg="white", font=("Verdana", 12), height=2, width=20)
             boton_skin.pack(pady=10) 
             
-    boton_atras = Button(window, text="ATRÁS", command=pantalla_inicio, bg="#343030", fg="white", font=("Verdana", 14))
-    boton_atras.pack(pady=20)
+    boton_atras = Button(window, text="ATRÁS", height=2, width=10, command=pantalla_inicio, 
+                        bg="#343030", fg="white",font=("Press Start 2P", 14))
+    boton_atras.place(x=10,y=10)
+    boton_atras.bind("<Enter>", on_enter)
+    boton_atras.bind("<Leave>", on_leave)
+
     actualizar_monedas()
 
 def comprar_y_actualizar(skin,precio, color):
@@ -355,4 +367,5 @@ cargar_monedas()
 cargar_skins_compradas()
 cargar_skin_actual()
 pantalla_inicio()
+window.after(500, actualizar_monedas)
 window.mainloop()
