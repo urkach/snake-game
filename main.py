@@ -80,11 +80,16 @@ def comprar_skin(skin, precio,color):
                 messagebox.showinfo("Monedas Insuficientes", "No tienes suficientes monedas.") 
 
 def play():
-    pygame.mixer.music.load('Audio\cyberpunk_audio.mp3')
+    if not pygame.mixer.get_init():
+        pygame.mixer.init()  # Re-inicializa el mixer si no está inicializado
+    pygame.mixer.music.load('Audio/cyberpunk_audio.mp3')
     pygame.mixer.music.play(loops=-1)
 
 def stop():
-    pygame.mixer.music.stop()
+    if pygame.mixer.get_init():
+        pygame.mixer.music.stop()
+        pygame.mixer.quit()
+
 
 def set_volume(volume):
     pygame.mixer.music.set_volume(float(volume) / 100)

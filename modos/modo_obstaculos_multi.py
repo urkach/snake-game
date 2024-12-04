@@ -1,9 +1,9 @@
-# NO ESTA HECHO ES EL CLASICO MULTIJUGADOR
-
 import pygame
 import random
 
-monedas=0
+monedas = 0
+
+# Funciones para manejar monedas y skins
 def cargar_monedas(): 
     global monedas
     try:
@@ -17,38 +17,40 @@ def guardar_monedas():
         file.write(str(monedas))
 
 def actualizar_monedas():
-    print(f"monedas:{monedas}")
-    guardar_monedas()
+    print(f"Monedas: {monedas}")
 
 def comer_fruta():
     global monedas
-    monedas+= 1
+    monedas += 1
     actualizar_monedas()
 
 def cargar_skin_actual():
     global skin_actual1, skin_actual2
-    try: 
-        with open("skin_actual.txt", "r") as file: 
-            skin_actual1 = file.read().strip() 
-    except FileNotFoundError: 
-        skin_actual1 = "green"
-
+    # Forzar el color verde para la serpiente del jugador 1
+    skin_actual1 = (0, 255, 0)  # Verde
     try:
         with open("skin_actual2.txt", "r") as file: 
             skin_actual2 = file.read().strip() 
     except FileNotFoundError: 
-        skin_actual2 = "blue"
+        skin_actual2 = (0, 0, 255)  # Azul predeterminado
 
+# Función para verificar colisiones con tolerancia
+def check_collision(pos1, pos2, tolerance=10):
+    return abs(pos1[0] - pos2[0]) <= tolerance and abs(pos1[1] - pos2[1]) <= tolerance
 
+def verificar_colision_serpientes(snake1, snake2, tolerance=10):
+    for segmento1 in snake1:
+        for segmento2 in snake2:
+            if check_collision(segmento1, segmento2, tolerance):
+                return True
+    return False
+
+# Función principal del juego
 def gameLoop(window):
     pygame.init()
     pygame.mixer.init()
-
-
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
-    GREEN = (0, 255, 0)
-    BLUE = (0, 0, 255)
     RED = (213, 50, 80)
     YELLOW = (255, 255, 102)
 
@@ -63,7 +65,7 @@ def gameLoop(window):
 
     font_style = pygame.font.SysFont("Cascadia Code PL, monospace", 25, bold=True)
     score_font = pygame.font.SysFont("Cascadia Code PL, monospace", 35, bold=True)
-    moneda_font = pygame.font.SysFont("Cascadia Code PL, monospace", 35, bold=True)
+    moneda_font = pygame.font.SysFont("Cascadia Code PL, monospace", 35, bold=True) 
 
     def message(msg, color, x, y):
         mesg = font_style.render(msg, True, color)
@@ -101,12 +103,12 @@ def gameLoop(window):
 
     while not game_over:
         while game_close:
-            pygame.mixer.music.stop()  # Detén la música al perder
+            pygame.mixer.music.stop()
             game_display.fill(BLACK)
-            message("¡FIN DEL JUEGO!", RED,  SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 5)
-            message(f"PLAYER 1: {score1} PTS", GREEN, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2.5)
-            message(f"PLAYER 2: {score2} PTS", BLUE, SCREEN_WIDTH * 3 / 4 - 200, SCREEN_HEIGHT / 2.5)
-            message("C (INICIAR) / Q (SALIR)", RED,SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 1.75)
+            message("¡HAS PERDIDO!", RED, SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 5.5)
+            message(f"PLAYER 1: {score1} PTS", skin_actual1, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2.5)
+            message(f"PLAYER 2: {score2} PTS", skin_actual2, SCREEN_WIDTH * 3 / 4 - 200, SCREEN_HEIGHT / 2.5)
+            message("C (INICIAR) / Q (SALIR)", RED, SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 1.75)
             pygame.display.update()
 
             for event in pygame.event.get():
@@ -122,7 +124,7 @@ def gameLoop(window):
                         pygame.mixer.music.set_pos(times / 1000)
                         return
                     if event.key == pygame.K_c:
-                        pygame.mixer.music.play(loops=-1)  # Reanuda la música al reiniciar
+                        pygame.mixer.music.play(loops=-1)
                         gameLoop(window)
 
         for event in pygame.event.get():
@@ -154,19 +156,13 @@ def gameLoop(window):
                     x2_change, y2_change = 0, BLOCK_SIZE
                     direction2 = "DOWN"
 
-        if x1 >= SCREEN_WIDTH or x1 < 0 or y1 >= SCREEN_HEIGHT or y1 < 0:
-            game_close = True
-        if x2 >= SCREEN_WIDTH or x2 < 0 or y2 >= SCREEN_HEIGHT or y2 < 0:
-            game_close = True
-
         x1 += x1_change
         y1 += y1_change
         x2 += x2_change
         y2 += y2_change
 
-        game_display.fill(BLACK)
-
-        pygame.draw.rect(game_display, YELLOW, [foodx, foody, BLOCK_SIZE, BLOCK_SIZE])
+        if x1 >= SCREEN_WIDTH or x1 < 0 or y1 >= SCREEN_HEIGHT or y1 < 0 or x2 >= SCREEN_WIDTH or x2 < 0 or y2 >= SCREEN_HEIGHT or y2 < 0:
+            game_close = True
 
         snake1_head = [x1, y1]
         snake1_list.append(snake1_head)
@@ -178,49 +174,36 @@ def gameLoop(window):
         if len(snake2_list) > snake2_length:
             del snake2_list[0]
 
-        for segment in snake1_list[:-1]:
-            if segment == snake1_head:
-                game_close = True
-        for segment in snake2_list[:-1]:
-            if segment == snake2_head:
-                game_close = True
+        if verificar_colision_serpientes(snake1_list, snake2_list):
+            game_close = True
 
-        
-
-        def check_collision(pos1, pos2, tolerance=10):
-            return abs(pos1[0] - pos2[0]) <= tolerance and abs(pos1[1] - pos2[1]) <= tolerance
-        
-
-        for segment in snake1_list:
-            if check_collision(segment, snake2_head):
-                game_close = True
-        for segment in snake2_list:
-            if check_collision(segment, snake1_head):
-                game_close = True
-
-
-
-        draw_snake(BLOCK_SIZE, snake1_list, skin_actual1)
-        draw_snake(BLOCK_SIZE, snake2_list, skin_actual2)
-
-        if x1 - BLOCK_SIZE <= foodx <= x1 + BLOCK_SIZE and y1 - BLOCK_SIZE <= foody <= y1 + BLOCK_SIZE:
+        if check_collision([x1, y1], [foodx, foody]):
             foodx, foody = generate_food()
             snake1_length += 1
             score1 += 1
-        if x2 - BLOCK_SIZE <= foodx <= x2 + BLOCK_SIZE and y2 - BLOCK_SIZE <= foody <= y2 + BLOCK_SIZE:
+            comer_fruta()
+
+        if check_collision([x2, y2], [foodx, foody]):
             foodx, foody = generate_food()
             snake2_length += 1
             score2 += 1
+            comer_fruta()
 
-        score_text1 = score_font.render("PLAYER 1: " + str(score1), True, GREEN)
-        score_text2 = score_font.render("PLAYER 2: " + str(score2), True, BLUE)
+        game_display.fill(BLACK)
+        pygame.draw.rect(game_display, YELLOW, [foodx, foody, BLOCK_SIZE, BLOCK_SIZE])
+        draw_snake(BLOCK_SIZE, snake1_list, skin_actual1)
+        draw_snake(BLOCK_SIZE, snake2_list, skin_actual2)
+
+        score_text1 = score_font.render("PLAYER 1: " + str(score1), True, skin_actual1)
+        score_text2 = score_font.render("PLAYER 2: " + str(score2), True, skin_actual2)
         monedas_text = moneda_font.render("Monedas: " + str(monedas), True, YELLOW)
         game_display.blit(score_text1, [10, 10])
         game_display.blit(score_text2, [10, 50])
         game_display.blit(monedas_text, [10, 90])
-        pygame.display.update()
 
+        pygame.display.update()
         clock.tick(15)
 
+    guardar_monedas()
     pygame.quit()
     quit()
