@@ -196,8 +196,8 @@ def gameLoop(window):
         draw_snake(BLOCK_SIZE, snake1_list, skin_actual1)
         draw_snake(BLOCK_SIZE, snake2_list, skin_actual2)
 
-        score_text1 = score_font.render("PLAYER 1: " + str(score1), True, skin_actual1)
-        score_text2 = score_font.render("PLAYER 2: " + str(score2), True, skin_actual2)
+        score_text1 = score_font.render("JUGADOR 1: " + str(score1), True, skin_actual1)
+        score_text2 = score_font.render("JUGADOR 2: " + str(score2), True, skin_actual2)
         monedas_text = moneda_font.render("Monedas: " + str(monedas), True, YELLOW)
         game_display.blit(score_text1, [10, 10])
         game_display.blit(score_text2, [10, 50])

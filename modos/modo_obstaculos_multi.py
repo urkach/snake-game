@@ -58,10 +58,11 @@ def gameLoop(window):
     surface = pygame.display.get_surface()
     SCREEN_WIDTH, SCREEN_HEIGHT = surface.get_width(), surface.get_height()
 
-    pygame.display.set_caption('Snake Game - Multijugador')
+    pygame.display.set_caption('Snake Game - Multijugador con Obstáculos')
 
     clock = pygame.time.Clock()
     BLOCK_SIZE = 30
+    OBSTACLE_SIZE = 40
 
     font_style = pygame.font.SysFont("Cascadia Code PL, monospace", 25, bold=True)
     score_font = pygame.font.SysFont("Cascadia Code PL, monospace", 35, bold=True)
@@ -78,7 +79,7 @@ def gameLoop(window):
     game_over = False
     game_close = False
 
-    x1, y1 = SCREEN_WIDTH * 3/ 4, SCREEN_HEIGHT / 2
+    x1, y1 = SCREEN_WIDTH * 3 / 4, SCREEN_HEIGHT / 2
     x1_change, y1_change = 0, 0
     snake1_length = 1
     snake1_list = [[x1, y1]]
@@ -90,6 +91,8 @@ def gameLoop(window):
 
     score1, score2 = 0, 0
     direction1, direction2 = None, None
+
+    obstacles = []
 
     def generate_food():
         return (
@@ -131,6 +134,7 @@ def gameLoop(window):
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
+                # Controles para jugador 1
                 if event.key == pygame.K_LEFT and direction1 != "RIGHT":
                     x1_change, y1_change = -BLOCK_SIZE, 0
                     direction1 = "LEFT"
@@ -143,6 +147,7 @@ def gameLoop(window):
                 elif event.key == pygame.K_DOWN and direction1 != "UP":
                     x1_change, y1_change = 0, BLOCK_SIZE
                     direction1 = "DOWN"
+                # Controles para jugador 2
                 elif event.key == pygame.K_a and direction2 != "RIGHT":
                     x2_change, y2_change = -BLOCK_SIZE, 0
                     direction2 = "LEFT"
@@ -164,46 +169,71 @@ def gameLoop(window):
         if x1 >= SCREEN_WIDTH or x1 < 0 or y1 >= SCREEN_HEIGHT or y1 < 0 or x2 >= SCREEN_WIDTH or x2 < 0 or y2 >= SCREEN_HEIGHT or y2 < 0:
             game_close = True
 
-        snake1_head = [x1, y1]
-        snake1_list.append(snake1_head)
-        if len(snake1_list) > snake1_length:
-            del snake1_list[0]
+        # Dibujar y verificar obstáculos
+        game_display.fill(BLACK)
+        for obstacle in obstacles:
+            pygame.draw.rect(game_display, RED, [obstacle[0], obstacle[1], OBSTACLE_SIZE, OBSTACLE_SIZE])
+            if (obstacle[0] <= x1 < obstacle[0] + OBSTACLE_SIZE and obstacle[1] <= y1 < obstacle[1] + OBSTACLE_SIZE) or \
+               (obstacle[0] <= x2 < obstacle[0] + OBSTACLE_SIZE and obstacle[1] <= y2 < obstacle[1] + OBSTACLE_SIZE):
+                game_close = True
 
-        snake2_head = [x2, y2]
-        snake2_list.append(snake2_head)
-        if len(snake2_list) > snake2_length:
-            del snake2_list[0]
-
+        # Verificar colisiones entre serpientes
         if verificar_colision_serpientes(snake1_list, snake2_list):
             game_close = True
 
+        # Verificar colisión con comida
         if check_collision([x1, y1], [foodx, foody]):
             foodx, foody = generate_food()
             snake1_length += 1
             score1 += 1
             comer_fruta()
+            obstacles.append(generate_food())
 
         if check_collision([x2, y2], [foodx, foody]):
             foodx, foody = generate_food()
             snake2_length += 1
             score2 += 1
             comer_fruta()
+            obstacles.append(generate_food())
 
-        game_display.fill(BLACK)
+        # Dibujar serpientes y comida
         pygame.draw.rect(game_display, YELLOW, [foodx, foody, BLOCK_SIZE, BLOCK_SIZE])
         draw_snake(BLOCK_SIZE, snake1_list, skin_actual1)
         draw_snake(BLOCK_SIZE, snake2_list, skin_actual2)
 
-        score_text1 = score_font.render("PLAYER 1: " + str(score1), True, skin_actual1)
-        score_text2 = score_font.render("PLAYER 2: " + str(score2), True, skin_actual2)
-        monedas_text = moneda_font.render("Monedas: " + str(monedas), True, YELLOW)
-        game_display.blit(score_text1, [10, 10])
-        game_display.blit(score_text2, [10, 50])
-        game_display.blit(monedas_text, [10, 90])
+
+        # Dibujar puntajes y monedas en la parte superior izquierda
+        score_text1 = score_font.render("JUGADOR 1: " + str(score1), True, skin_actual1)
+        score_text2 = score_font.render("JUGADOR 2: " + str(score2), True, skin_actual2)
+        monedas_text = moneda_font.render(f"MONEDAS: {monedas}", True, YELLOW)
+
+        # Posiciones ajustadas para la parte superior izquierda
+        game_display.blit(score_text1, (20, 20))   # PLAYER 1 en la parte superior
+        game_display.blit(score_text2, (20, 60))   # PLAYER 2 debajo de PLAYER 1
+        game_display.blit(monedas_text, (20, 100)) # MONEDAS debajo de PLAYER 2
+
+
+
+        # Mover y verificar colisión de la serpiente consigo misma
+        snake1_head = [x1, y1]
+        snake2_head = [x2, y2]
+        snake1_list.append(snake1_head)
+        snake2_list.append(snake2_head)
+
+        if len(snake1_list) > snake1_length:
+            del snake1_list[0]
+        if len(snake2_list) > snake2_length:
+            del snake2_list[0]
+
+        for block in snake1_list[:-1]:
+            if block == snake1_head:
+                game_close = True
+        for block in snake2_list[:-1]:
+            if block == snake2_head:
+                game_close = True
 
         pygame.display.update()
         clock.tick(15)
 
-    guardar_monedas()
     pygame.quit()
-    quit()
+    guardar_monedas()

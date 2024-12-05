@@ -159,7 +159,7 @@ def gameLoop(window):
             game_display.fill(BLACK)
             message("¡FIN DEL JUEGO!", RED, SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 4)
             for i, player in enumerate(players):
-                message(f"PLAYER {i + 1}: {player['score']} PTS", player["color"], SCREEN_WIDTH / 2.85,
+                message(f"JUGADOR {i + 1}: {player['score']} PTS", player["color"], SCREEN_WIDTH / 2.85,
                         SCREEN_HEIGHT / 2.5 + i * 40)
             message("C (INICIAR) / Q (SALIR)", RED,  SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 1.75)
             pygame.display.update()
@@ -269,7 +269,7 @@ def gameLoop(window):
 
         # Mostrar puntuación
         for i, player in enumerate(players):
-            score_text = score_font.render(f"PLAYER {i + 1}: {player['score']}", True, WHITE)
+            score_text = score_font.render(f"JUGADOR {i + 1}: {player['score']}", True, WHITE)
             game_display.blit(score_text, [10, 40 * i])
 
         pygame.display.update()
