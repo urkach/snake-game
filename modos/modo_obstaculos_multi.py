@@ -39,7 +39,7 @@ def cargar_skin_actual():
         skin_actual2 = (0, 0, 255)  # Azul por defecto para jugador 2
 
 # Función para verificar si dos posiciones están dentro de un rango de tolerancia
-def check_collision(pos1, pos2, tolerance=10):
+def check_collision(pos1, pos2, tolerance=25):
     return abs(pos1[0] - pos2[0]) <= tolerance and abs(pos1[1] - pos2[1]) <= tolerance
 
 # Función para detectar colisiones entre dos serpientes
@@ -55,6 +55,10 @@ def gameLoop(window):
     # Inicialización de pygame
     pygame.init()
     pygame.mixer.init()
+
+    # Cargar la música
+    pygame.mixer.music.load("Audio/cyberpunk_audio.mp3")
+    pygame.mixer.music.play(-1, 0.0)  # La música se repetirá infinitamente.
 
     # Definición de colores
     WHITE = (255, 255, 255)
@@ -157,6 +161,7 @@ def gameLoop(window):
                         return
                     if event.key == pygame.K_c:
                         # Reiniciar el juego
+                        pygame.mixer.music.play(loops=-1)  # Reanuda la música
                         gameLoop(window)
 
         # Manejo de eventos durante el juego
@@ -235,6 +240,19 @@ def gameLoop(window):
         for block in snake2_list[:-1]:
             if block == snake2_head:
                 game_close = True
+
+        # Comprobar si las serpientes han comido la comida
+        if check_collision([x1, y1], [foodx, foody]):
+            foodx, foody = generate_food()
+            snake1_length += 1
+            score1 += 1
+            comer_fruta()
+
+        if check_collision([x2, y2], [foodx, foody]):
+            foodx, foody = generate_food()
+            snake2_length += 1
+            score2 += 1
+            comer_fruta()
 
         pygame.display.update()
         clock.tick(15)
