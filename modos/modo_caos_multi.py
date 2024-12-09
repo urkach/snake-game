@@ -112,12 +112,12 @@ def gameLoop(window):
                 pygame.display.update()
 
     # Función que se llama cuando el jugador pierde
-    def end_game(player_score):
+    def end_game(winner):
         pygame.mixer.music.stop()  # Detiene la música
         game_display.fill(BLACK)  # Rellena la pantalla de negro
-        message("¡HAS PERDIDO!", RED, SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 5)  # Muestra mensaje de derrota
-        message(f"PUNTUACION: {player_score} PTS", RED, SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 2.5)  # Muestra puntuación
-        message("C (INICIAR) / Q (SALIR)", RED, SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 1.75)  # Instrucciones
+        message(f"¡HA GANADO JUGADOR {winner}!", YELLOW, SCREEN_WIDTH / 2.5, SCREEN_HEIGHT / 5)  # Muestra mensaje de victoria
+        message("Para reiniciar presiona C", YELLOW, SCREEN_WIDTH / 2.8, SCREEN_HEIGHT / 2)
+        message("Para salir presiona Q", YELLOW, SCREEN_WIDTH / 2.8, SCREEN_HEIGHT / 2 + 40)
         pygame.display.update()
 
         while True:  # Bucle para esperar que el jugador elija qué hacer
@@ -207,7 +207,9 @@ def gameLoop(window):
                 player["x"] >= SCREEN_WIDTH or player["x"] < 0 or
                 player["y"] >= SCREEN_HEIGHT or player["y"] < 0
             ):
-                end_game(player["score"])  # Termina el juego si se sale
+                # Si un jugador sale de la pantalla, el otro jugador gana
+                winner = 1 if players[1]["score"] > players[0]["score"] else 2
+                end_game(winner)  # Termina el juego
                 return
 
             # Actualiza la serpiente
@@ -219,7 +221,9 @@ def gameLoop(window):
             # Verifica colisiones con el cuerpo de la serpiente
             for segment in player["snake_list"][:-1]:
                 if check_collision(segment, snake_head):
-                    end_game(player["score"])  # Termina el juego si colide con su cuerpo
+                    # Si el jugador colide con su propio cuerpo, el otro jugador gana
+                    winner = 1 if players[1]["score"] > players[0]["score"] else 2
+                    end_game(winner)  # Termina el juego
                     return
 
             draw_snake(BLOCK_SIZE, player["snake_list"], player["color"])  # Dibuja la serpiente
@@ -230,7 +234,9 @@ def gameLoop(window):
                 if i != j:  # No comprobar colisión consigo mismo
                     for segment in other_player["snake_list"]:
                         if check_collision((player["x"], player["y"]), segment):
-                            end_game(player["score"])  # Termina el juego si colide con otro jugador
+                            # Si un jugador colide con otro, el otro jugador gana
+                            winner = 1 if players[1]["score"] > players[0]["score"] else 2
+                            end_game(winner)  # Termina el juego
                             return
 
         # Dibujar comida
@@ -275,7 +281,9 @@ def gameLoop(window):
         for player in players:
             for obsx, obsy in obstacle_positions:
                 if check_collision((player["x"], player["y"]), (obsx, obsy)):
-                    end_game(player["score"])  # Termina el juego si colide con un obstáculo
+                    # Si un jugador choca con un obstáculo, el otro jugador gana
+                    winner = 1 if players[1]["score"] > players[0]["score"] else 2
+                    end_game(winner)  # Termina el juego
                     return
 
         # Dibujar puntuación de los jugadores
