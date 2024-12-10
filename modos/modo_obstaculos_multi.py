@@ -96,6 +96,7 @@ def gameLoop(window):
     # Variables de estado del juego
     game_over = False
     game_close = False
+    ganador = None
 
     # Posición inicial del jugador 1
     x1, y1 = SCREEN_WIDTH * 3 / 4, SCREEN_HEIGHT / 2
@@ -123,12 +124,6 @@ def gameLoop(window):
             round(random.randrange(0, SCREEN_HEIGHT - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
         )
 
-    def generate_obstacle():
-        return (
-            round(random.randrange(0, SCREEN_WIDTH - OBSTACLE_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
-            round(random.randrange(0, SCREEN_HEIGHT - OBSTACLE_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
-        )
-
     foodx, foody = generate_food()
 
     # Cargar monedas y skins iniciales
@@ -141,15 +136,13 @@ def gameLoop(window):
             pygame.mixer.music.stop()
             game_display.fill(BLACK)
 
-            # Determinar el ganador
-            ganador = None
-            if (x1 >= SCREEN_WIDTH or x1 < 0 or y1 >= SCREEN_HEIGHT or y1 < 0) or any(block == [x1, y1] for block in snake1_list[:-1]):
-                ganador = "PLAYER 2"  # Gana el jugador 2
-            elif (x2 >= SCREEN_WIDTH or x2 < 0 or y2 >= SCREEN_HEIGHT or y2 < 0) or any(block == [x2, y2] for block in snake2_list[:-1]):
-                ganador = "PLAYER 1"  # Gana el jugador 1
-
-            if ganador:
-                message(f"¡{ganador} HA GANADO LA PARTIDA!", YELLOW, SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 5.5)
+            # Mostrar el ganador
+            if ganador == "PLAYER 1":
+                message("¡HA GANADO JUGADOR 1!", skin_actual1, SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 5.5)
+            elif ganador == "PLAYER 2":
+                message("¡HA GANADO JUGADOR 2!", skin_actual2, SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 5.5)
+            elif ganador == "EMPATE":
+                message("¡ES UN EMPATE!", YELLOW, SCREEN_WIDTH / 2.85, SCREEN_HEIGHT / 5.5)
 
             # Mostrar puntuaciones y opciones
             message(f"PLAYER 1: {score1} PTS", skin_actual1, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 2.5)
@@ -161,21 +154,18 @@ def gameLoop(window):
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
-                        # Salir del juego
                         pygame.quit()
                         window.deiconify()
                         return
                     if event.key == pygame.K_c:
-                        # Reiniciar el juego
                         pygame.mixer.music.play(loops=-1)  # Reanuda la música
                         gameLoop(window)
 
-        # Manejo de eventos durante el juego
+        # Lógica del juego
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
-                # Controles del jugador 1
                 if event.key == pygame.K_LEFT and direction1 != "RIGHT":
                     x1_change, y1_change = -BLOCK_SIZE, 0
                     direction1 = "LEFT"
@@ -188,7 +178,6 @@ def gameLoop(window):
                 elif event.key == pygame.K_DOWN and direction1 != "UP":
                     x1_change, y1_change = 0, BLOCK_SIZE
                     direction1 = "DOWN"
-                # Controles del jugador 2
                 elif event.key == pygame.K_a and direction2 != "RIGHT":
                     x2_change, y2_change = -BLOCK_SIZE, 0
                     direction2 = "LEFT"
@@ -202,34 +191,43 @@ def gameLoop(window):
                     x2_change, y2_change = 0, BLOCK_SIZE
                     direction2 = "DOWN"
 
-        # Actualización de posiciones
         x1 += x1_change
         y1 += y1_change
         x2 += x2_change
         y2 += y2_change
 
-        # Verificar colisiones con los bordes, comida, y obstáculos
-        if x1 >= SCREEN_WIDTH or x1 < 0 or y1 >= SCREEN_HEIGHT or y1 < 0 or \
-           x2 >= SCREEN_WIDTH or x2 < 0 or y2 >= SCREEN_HEIGHT or \
-           verificar_colision_serpientes(snake1_list, snake2_list):
+        # Verificar colisiones con los bordes
+        if x1 >= SCREEN_WIDTH or x1 < 0 or y1 >= SCREEN_HEIGHT or y1 < 0:
+            ganador = "PLAYER 2"
+            game_close = True
+        elif x2 >= SCREEN_WIDTH or x2 < 0 or y2 >= SCREEN_HEIGHT or y2 < 0:
+            ganador = "PLAYER 1"
             game_close = True
 
-        # Comprobar colisión con obstáculos
+        # Verificar colisiones con obstáculos
         for obs in obstacles:
-            if check_collision([x1, y1], obs) or check_collision([x2, y2], obs):
+            if check_collision([x1, y1], obs, tolerance=OBSTACLE_SIZE):
+                ganador = "PLAYER 2"
                 game_close = True
+            elif check_collision([x2, y2], obs, tolerance=OBSTACLE_SIZE):
+                ganador = "PLAYER 1"
+                game_close = True
+
+        # Verificar colisión entre serpientes
+        if verificar_colision_serpientes(snake1_list, snake2_list):
+            ganador = "EMPATE"
+            game_close = True
 
         game_display.fill(BLACK)
 
-        # Dibujar comida, serpientes y obstáculos
+        # Dibujar comida, serpientes, y obstáculos
         pygame.draw.rect(game_display, YELLOW, [foodx, foody, BLOCK_SIZE, BLOCK_SIZE])
         draw_snake(BLOCK_SIZE, snake1_list, skin_actual1)
         draw_snake(BLOCK_SIZE, snake2_list, skin_actual2)
-
         for obs in obstacles:
             pygame.draw.rect(game_display, RED, [obs[0], obs[1], OBSTACLE_SIZE, OBSTACLE_SIZE])
 
-        # Actualizar puntajes y monedas en pantalla
+        # Actualizar pantalla con puntajes y monedas
         score_text1 = score_font.render("JUGADOR 1: " + str(score1), True, skin_actual1)
         score_text2 = score_font.render("JUGADOR 2: " + str(score2), True, skin_actual2)
         monedas_text = moneda_font.render(f"MONEDAS: {monedas}", True, YELLOW)
@@ -238,7 +236,7 @@ def gameLoop(window):
         game_display.blit(score_text2, (20, 60))
         game_display.blit(monedas_text, (20, 100))
 
-        # Crecimiento de las serpientes
+        # Actualización de posiciones de serpientes
         snake1_head = [x1, y1]
         snake2_head = [x2, y2]
         snake1_list.append(snake1_head)
@@ -249,31 +247,25 @@ def gameLoop(window):
         if len(snake2_list) > snake2_length:
             del snake2_list[0]
 
-        # Verificar colisiones internas
-        for block in snake1_list[:-1]:
-            if block == snake1_head:
-                game_close = True
-        for block in snake2_list[:-1]:
-            if block == snake2_head:
-                game_close = True
-
         # Comprobar si las serpientes han comido la comida
         if check_collision([x1, y1], [foodx, foody]):
             foodx, foody = generate_food()
             snake1_length += 1
             score1 += 1
             comer_fruta()
-            obstacles.append(generate_obstacle())  # Agregar un nuevo obstáculo
+            obstacles.append((random.randint(0, SCREEN_WIDTH // OBSTACLE_SIZE) * OBSTACLE_SIZE,
+                              random.randint(0, SCREEN_HEIGHT // OBSTACLE_SIZE) * OBSTACLE_SIZE))
 
         if check_collision([x2, y2], [foodx, foody]):
             foodx, foody = generate_food()
             snake2_length += 1
             score2 += 1
             comer_fruta()
-            obstacles.append(generate_obstacle())  # Agregar un nuevo obstáculo
+            obstacles.append((random.randint(0, SCREEN_WIDTH // OBSTACLE_SIZE) * OBSTACLE_SIZE,
+                              random.randint(0, SCREEN_HEIGHT // OBSTACLE_SIZE) * OBSTACLE_SIZE))
 
         pygame.display.update()
         clock.tick(15)
 
     pygame.quit()
-    guardar_monedas()  # Guardar monedas al finalizar el juego
+    guardar_monedas()
