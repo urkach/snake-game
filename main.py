@@ -145,6 +145,7 @@ def configuracion():
         widget.destroy()
 
     is_muted = False  # Inicializa el estado de "no silenciado"
+    pygame.mixer.init()
     current_volume = pygame.mixer.music.get_volume()  # Obtiene el volumen actual de la música
 
     window.title("Configuración")  # Cambia el título de la ventana
@@ -227,6 +228,8 @@ def iniciar_juego(modo_juego):
     # Llama a la función correspondiente para iniciar el juego según el modo seleccionado
     modo_juego(window)
     # Detiene la música al salir del juego
+    pygame.mixer.init()
+
     pygame.mixer.music.stop()
 
 def obstaculos():
