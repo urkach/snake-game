@@ -249,14 +249,14 @@ def tienda():
         widget.destroy()
 
     # Cambia el título de la ventana
-    window.title("Tienda de Skins")
+    window.title("TIENDA SKINS")
 
     # Crea un Label que muestra el título de la tienda
-    label_tienda = Label(window, text="Tienda de Skins", font=("Verdana", 24), fg="white", bg="#343030")
+    label_tienda = Label(window, text="TIENDA SKINS", font=("Press Start 2P", 14), fg="white", bg="#343030")
     label_tienda.pack(pady=20)
 
     # Muestra la cantidad actual de monedas en la tienda
-    label_monedas_tienda = Label(window, text=f"monedas: {monedas}", font=("verdana", 14), fg="white", bg="#343030")
+    label_monedas_tienda = Label(window, text=f"MONEDAS: {monedas}", font=("Press Start 2P", 14), fg="white", bg="#343030")
     label_monedas_tienda.pack(pady=10)
 
     # Crea un contenedor para los skins disponibles
@@ -272,7 +272,7 @@ def tienda():
         frame_skin.grid(row=0, column=i, padx=30, pady=(3, 20))
 
         # Crea una etiqueta para mostrar el nombre del skin
-        label_skin = Label(frame_skin, text=skins[i], bg="#212121", fg="white", font=("Verdana", 14))
+        label_skin = Label(frame_skin, text=skins[i], bg="#212121", fg="white", font=("Press Start 2P", 14))
         label_skin.pack(pady=5)
 
         try:
@@ -290,24 +290,24 @@ def tienda():
             imagenes_tk.append(imagen_tk)
         except Exception as e:
             # Si ocurre un error cargando la imagen, muestra un mensaje de error
-            label_error = Label(frame_skin, text=f"Error loading image: {e}", bg="#212121", fg="red", font=("Verdana", 10))
+            label_error = Label(frame_skin, text=f"ERROR LOADING IMAGE: {e}", bg="#212121", fg="red", font=("Press Start 2P", 14))
             label_error.pack(pady=10)
 
         # Si el skin ya ha sido comprado, deshabilita el botón y agrega un botón para equipar
         if skins[i] in skins_compradas:
-            boton_skin = Button(frame_skin, text="Comprada", state=DISABLED, bg="#343030", fg="white", font=("Verdana", 12), height=2, width=20)
+            boton_skin = Button(frame_skin, text="COMPRADA", state=DISABLED, bg="#343030", fg="white", font=("Press Start 2P", 14), height=2, width=20)
             boton_skin.pack(pady=10)
 
             # Crea un botón para equipar el skin comprado
-            boton_equipar = Button(frame_skin, text=f"Equipar {skins[i]}",
+            boton_equipar = Button(frame_skin, text=f"EQUIPAR {skins[i]}",
                                    command=lambda color=colores_skins[i]: equipar_skin(color),
-                                   bg="#343030", fg="white", font=("Verdana", 12), height=2, width=20)
+                                   bg="#343030", fg="white", font=("Press Start 2P", 12), height=2, width=23)
             boton_equipar.pack(pady=10)
         else: 
             # Si el skin no ha sido comprado, muestra el precio y un botón para comprarlo
-            boton_skin = Button(frame_skin, text=f"Comprar {precios_skins[i]} monedas",
+            boton_skin = Button(frame_skin, text=f"COMPRAR {precios_skins[i]} MONEDAS",
                                   command=lambda s=skins[i], precio=precios_skins[i], color=colores_skins[i]: comprar_skin(s, precio, color),
-                                  bg="#343030", fg="white", font=("Verdana", 12), height=2, width=20)
+                                  bg="#343030", fg="white", font=("Press Start 2P", 14), height=2, width=20)
             boton_skin.pack(pady=10)
 
     # Crea un botón de regreso que lleva a la pantalla principal
@@ -410,7 +410,7 @@ def pantalla_inicio():
     label.pack()
 
     global label_monedas  # Se declara una variable global para el label de monedas
-    label_monedas = Label(window, text=f"Monedas: {monedas}", font=("Verdana", 14), fg="white", bg="#343030")
+    label_monedas = Label(window, text=f"MONEDAS: {monedas}", font=("Press Start 2P", 14), fg="white", bg="#343030")
     label_monedas.pack(pady=10) 
     actualizar_monedas()  # Actualiza la cantidad de monedas mostradas
 
