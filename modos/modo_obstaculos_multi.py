@@ -123,6 +123,12 @@ def gameLoop(window):
             round(random.randrange(0, SCREEN_HEIGHT - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
         )
 
+    def generate_obstacle():
+        return (
+            round(random.randrange(0, SCREEN_WIDTH - OBSTACLE_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
+            round(random.randrange(0, SCREEN_HEIGHT - OBSTACLE_SIZE) / BLOCK_SIZE) * BLOCK_SIZE,
+        )
+
     foodx, foody = generate_food()
 
     # Cargar monedas y skins iniciales
@@ -203,8 +209,15 @@ def gameLoop(window):
         y2 += y2_change
 
         # Verificar colisiones con los bordes, comida, y obstáculos
-        if x1 >= SCREEN_WIDTH or x1 < 0 or y1 >= SCREEN_HEIGHT or y1 < 0 or x2 >= SCREEN_WIDTH or x2 < 0 or y2 >= SCREEN_HEIGHT or verificar_colision_serpientes(snake1_list, snake2_list):
+        if x1 >= SCREEN_WIDTH or x1 < 0 or y1 >= SCREEN_HEIGHT or y1 < 0 or \
+           x2 >= SCREEN_WIDTH or x2 < 0 or y2 >= SCREEN_HEIGHT or \
+           verificar_colision_serpientes(snake1_list, snake2_list):
             game_close = True
+
+        # Comprobar colisión con obstáculos
+        for obs in obstacles:
+            if check_collision([x1, y1], obs) or check_collision([x2, y2], obs):
+                game_close = True
 
         game_display.fill(BLACK)
 
@@ -212,6 +225,9 @@ def gameLoop(window):
         pygame.draw.rect(game_display, YELLOW, [foodx, foody, BLOCK_SIZE, BLOCK_SIZE])
         draw_snake(BLOCK_SIZE, snake1_list, skin_actual1)
         draw_snake(BLOCK_SIZE, snake2_list, skin_actual2)
+
+        for obs in obstacles:
+            pygame.draw.rect(game_display, RED, [obs[0], obs[1], OBSTACLE_SIZE, OBSTACLE_SIZE])
 
         # Actualizar puntajes y monedas en pantalla
         score_text1 = score_font.render("JUGADOR 1: " + str(score1), True, skin_actual1)
@@ -247,12 +263,14 @@ def gameLoop(window):
             snake1_length += 1
             score1 += 1
             comer_fruta()
+            obstacles.append(generate_obstacle())  # Agregar un nuevo obstáculo
 
         if check_collision([x2, y2], [foodx, foody]):
             foodx, foody = generate_food()
             snake2_length += 1
             score2 += 1
             comer_fruta()
+            obstacles.append(generate_obstacle())  # Agregar un nuevo obstáculo
 
         pygame.display.update()
         clock.tick(15)
